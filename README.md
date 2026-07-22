@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Smart Meeting Workspace
+
+Smart Meeting Workspace is a single-user, AI-assisted web application that converts uploaded or pasted meeting notes into reviewed, structured, and trackable action items.
+
+## Core Flow
+
+`Login → Select/Create Project → Add Meeting Notes → Process with AI or Continue Manually → Human Review → Approve & Publish → Track Action Items`
+
+## Tech Stack
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- Supabase PostgreSQL
+- Supabase Auth
+- Supabase Storage
+- Gemini API
+- Vercel
+- GitHub
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+git clone <repository-url>
+cd smart-meeting-workspace
+git checkout develop
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Branching
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `main`: production-ready code
+- `develop`: integration branch
+- `feat/*`: feature development
+- `fix/*`: bug fixes
+- `docs/*`: documentation
+- `chore/*`: configuration and maintenance
 
-## Learn More
+Direct push to `main` and `develop` is not allowed.
 
-To learn more about Next.js, take a look at the following resources:
+## Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [Product Context](docs/PRODUCT_CONTEXT.md)
+- [MVP Acceptance Criteria](docs/MVP_ACCEPTANCE_CRITERIA.md)
+- [Technical Context](docs/TECHNICAL_CONTEXT.md)
+- [Database Schema](docs/DATABASE_SCHEMA.md)
+- [AI Extraction Contract](docs/AI_EXTRACTION_CONTRACT.md)
+- [Module Ownership](docs/MODULE_OWNERSHIP.md)
+- [Development Workflow](docs/WORKFLOW.md)
+- [UI Guidelines](docs/UI_GUIDELINES.md)
+- [Decision Log](docs/DECISION_LOG.md)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## MVP Boundary
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The MVP is a single-user workspace. PICs are lightweight contacts and do not have login accounts. AI output is always treated as a draft until the workspace owner reviews and publishes it.
