@@ -1,5 +1,7 @@
 import type { Project, ProjectFormInput, ProjectListFilters, ProjectUpdate } from "./types";
 
+import { createClient } from "@/lib/supabase/server";
+
 /**
  * Project repository.
  *
@@ -11,8 +13,29 @@ import type { Project, ProjectFormInput, ProjectListFilters, ProjectUpdate } fro
  * 5. Do not implement lifecycle business rules here.
  */
 export async function listProjects(ownerId: string, filters: ProjectListFilters = {}): Promise<Project[]> {
-  void ownerId; void filters;
-  return [];
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("projects")
+    .select("*")
+    .eq("owner_id", ownerId)
+    .order("updated_at", { ascending: false });
+
+  if (filters.status) {
+    query = query.eq("status", filters.status);
+  }
+
+  if (filters.search?.trim()) {
+    query = query.ilike("name", `%${filters.search.trim()}%`);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    throw new Error("Unable to load projects.");
+  }
+
+  return data;
 }
 
 export async function getProjectById(ownerId: string, projectId: string): Promise<Project | null> {
