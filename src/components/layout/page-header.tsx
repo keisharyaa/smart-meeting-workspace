@@ -1,32 +1,56 @@
 import type { ReactNode } from "react";
 
+import { cn } from "@/lib/utils";
+
 interface PageHeaderProps {
   title: string;
   description?: string;
+  eyebrow?: string;
   actions?: ReactNode;
+  className?: string;
 }
 
 /**
  * Shared heading block for workspace pages.
  *
- * TODO:
- * 1. Keep title, description, and page actions aligned consistently.
- * 2. Support responsive stacking when actions do not fit.
- * 3. Keep feature-specific data outside this component.
+ * Use this component for route-level page titles so typography,
+ * spacing, and responsive action placement remain consistent.
  */
 export function PageHeader({
   title,
   description,
+  eyebrow,
   actions,
+  className,
 }: PageHeaderProps) {
   return (
-    <header>
-      <div>
-        <h1>{title}</h1>
-        {description ? <p>{description}</p> : null}
+    <header
+      className={cn(
+        "mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between",
+        className,
+      )}
+    >
+      <div className="min-w-0">
+        {eyebrow ? (
+          <p className="mb-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-primary">
+            {eyebrow}
+          </p>
+        ) : null}
+
+        <h1 className="heading-page text-foreground">{title}</h1>
+
+        {description ? (
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+            {description}
+          </p>
+        ) : null}
       </div>
 
-      {actions ? <div>{actions}</div> : null}
+      {actions ? (
+        <div className="flex shrink-0 flex-wrap items-center gap-2">
+          {actions}
+        </div>
+      ) : null}
     </header>
   );
 }
