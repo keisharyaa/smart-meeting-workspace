@@ -1,22 +1,34 @@
-/**
- * Authentication service.
- *
- * TODO(Keisha):
- * 1. Implement email/password registration.
- * 2. Store full_name in user metadata.
- * 3. Implement login and logout.
- * 4. Return safe errors for invalid credentials.
- * 5. Respect email confirmation configuration.
- * 6. Never expose secret keys or raw provider errors.
- */
-export async function registerUser(): Promise<void> {
-  throw new Error("TODO: implement registerUser");
+import { createClient } from "@/lib/supabase/server";
+
+export interface LoginInput {
+  email: string;
+  password: string;
 }
 
-export async function loginUser(): Promise<void> {
-  throw new Error("TODO: implement loginUser");
+/**
+ * Authenticates a workspace owner through Supabase Auth.
+ * Provider details stay on the server and callers receive safe errors only.
+ */
+export async function loginUser({
+  email,
+  password,
+}: LoginInput): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    throw new Error("The email or password is incorrect.");
+  }
 }
 
 export async function logoutUser(): Promise<void> {
-  throw new Error("TODO: implement logoutUser");
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    throw new Error("We could not sign you out. Please try again.");
+  }
 }
