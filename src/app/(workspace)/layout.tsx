@@ -1,17 +1,22 @@
+import type { ReactNode } from "react";
+
+import { AppHeader } from "@/components/layout/app-header";
+import { AppSidebar } from "@/components/layout/app-sidebar";
+import { PageContainer } from "@/components/layout/page-container";
+
 /**
  * Workspace Layout
  *
  * TODO:
  * 1. Verify the authenticated user on the server.
  * 2. Redirect unauthenticated users to `/login`.
- * 3. Render the shared sidebar and header.
- * 4. Keep page-specific data fetching inside each route or feature query.
+ * 3. Render responsive sidebar and header behavior.
+ * 4. Keep page-specific data fetching inside each feature query.
  * 5. Do not query feature tables directly from this layout.
- * 6. Keep the layout usable on laptop and tablet widths.
  */
 
 interface WorkspaceLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default function WorkspaceLayout({
@@ -19,12 +24,16 @@ export default function WorkspaceLayout({
 }: WorkspaceLayoutProps) {
   return (
     <div className="min-h-screen">
-      <aside>{/* TODO: render AppSidebar */}</aside>
+      <aside>
+        <AppSidebar />
+      </aside>
 
       <div>
-        <header>{/* TODO: render AppHeader */}</header>
+        <AppHeader />
 
-        <main>{children}</main>
+        <PageContainer>
+          <main>{children}</main>
+        </PageContainer>
       </div>
     </div>
   );
