@@ -5,6 +5,7 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { PageContainer } from "@/components/layout/page-container";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -14,6 +15,8 @@ import {
 } from "@/components/ui/card";
 import { getCurrentUserProjects } from "@/features/projects/queries";
 import type { ProjectStatus } from "@/features/projects/types";
+
+export const dynamic = "force-dynamic";
 
 const projectStatusPresentation: Record<
   ProjectStatus,
@@ -33,6 +36,16 @@ export default async function ProjectsPage() {
         eyebrow="Workspace"
         title="Projects"
         description="Organize meeting records and follow-up work by project."
+        actions={
+          <Link
+            href="/projects/new"
+            className={buttonVariants({
+              className: "!text-primary-foreground",
+            })}
+          >
+            New project
+          </Link>
+        }
       />
 
       {error ? (

@@ -1,3 +1,4 @@
+import { insertProject } from "./repository";
 import type { Project, ProjectFormInput } from "./types";
 
 /**
@@ -13,8 +14,14 @@ import type { Project, ProjectFormInput } from "./types";
  * 7. Ignore draft actions in completion checks.
  */
 export async function createProject(ownerId: string, input: ProjectFormInput): Promise<Project> {
-  void ownerId; void input;
-  throw new Error("TODO: implement createProject");
+  const name = input.name.trim();
+  const description = input.description?.trim() || undefined;
+
+  if (!name) {
+    throw new Error("Project name is required.");
+  }
+
+  return insertProject(ownerId, { name, description });
 }
 
 export async function markProjectDone(ownerId: string, projectId: string): Promise<Project> {

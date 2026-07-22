@@ -44,8 +44,23 @@ export async function getProjectById(ownerId: string, projectId: string): Promis
 }
 
 export async function insertProject(ownerId: string, input: ProjectFormInput): Promise<Project> {
-  void ownerId; void input;
-  throw new Error("TODO: implement insertProject");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .insert({
+      owner_id: ownerId,
+      name: input.name,
+      description: input.description || null,
+      status: "active",
+    })
+    .select("*")
+    .single();
+
+  if (error) {
+    throw new Error("Unable to create project.");
+  }
+
+  return data;
 }
 
 export async function updateProjectRecord(ownerId: string, projectId: string, input: ProjectUpdate): Promise<Project> {
