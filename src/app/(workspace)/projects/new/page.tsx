@@ -1,19 +1,22 @@
-/**
- * New Project Page
- *
- * TODO(Olyvia):
- * 1. Render the project form component.
- * 2. Validate name and description.
- * 3. Submit through the project Server Action.
- * 4. New projects must start as Active.
- * 5. Redirect to project detail after success.
- */
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+import { Card, CardContent } from "@/components/ui/card";
+import { ProjectForm } from "@/features/projects/components/project-form";
 
 export default function NewProjectPage() {
   return (
-    <section>
-      <h1>New Project</h1>
-      <p>Project creation implementation is not available yet.</p>
-    </section>
+    <PageContainer className="max-w-3xl">
+      <PageHeader
+        eyebrow="Projects"
+        title="Create project"
+        description="Set up a project to organize related meetings and action items."
+      />
+
+      <Card>
+        <CardContent className="pt-5">
+          <ProjectForm />
+        </CardContent>
+      </Card>
+    </PageContainer>
   );
 }
