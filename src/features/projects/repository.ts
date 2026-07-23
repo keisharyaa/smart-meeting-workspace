@@ -39,8 +39,19 @@ export async function listProjects(ownerId: string, filters: ProjectListFilters 
 }
 
 export async function getProjectById(ownerId: string, projectId: string): Promise<Project | null> {
-  void ownerId; void projectId;
-  return null;
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .select("*")
+    .eq("id", projectId)
+    .eq("owner_id", ownerId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Unable to load project.");
+  }
+
+  return data;
 }
 
 export async function insertProject(ownerId: string, input: ProjectFormInput): Promise<Project> {
