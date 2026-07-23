@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,22 +8,46 @@ import { Textarea } from "@/components/ui/textarea";
 
 import {
   createProjectAction,
-  type CreateProjectActionState,
+  type ProjectFormActionState,
 } from "../actions";
 
-const initialState: CreateProjectActionState = {
+const initialState: ProjectFormActionState = {
   message: null,
   fieldErrors: {},
 };
 
-export function ProjectForm() {
+interface ProjectFormProps {
+  projectId?: string;
+  initialValues?: {
+    name: string;
+    description: string;
+  };
+  submitAction?: (
+    previousState: ProjectFormActionState,
+    formData: FormData,
+  ) => Promise<ProjectFormActionState>;
+  submitLabel?: string;
+  pendingLabel?: string;
+}
+
+export function ProjectForm({
+  projectId,
+  initialValues = { name: "", description: "" },
+  submitAction = createProjectAction,
+  submitLabel = "Create project",
+  pendingLabel = "Creating project...",
+}: ProjectFormProps) {
+  const [name, setName] = useState(initialValues.name);
+  const [description, setDescription] = useState(initialValues.description);
   const [state, formAction, isPending] = useActionState(
-    createProjectAction,
+    submitAction,
     initialState,
   );
 
   return (
     <form action={formAction} className="space-y-5">
+      {projectId ? <input type="hidden" name="projectId" value={projectId} /> : null}
+
       <div className="space-y-2">
         <label htmlFor="name" className="text-sm font-medium text-foreground">
           Project name <span className="text-destructive">*</span>
@@ -32,6 +56,8 @@ export function ProjectForm() {
           id="name"
           name="name"
           placeholder="Example: Smart Meeting Workspace"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
           required
           aria-invalid={Boolean(state.fieldErrors.name)}
           aria-describedby={state.fieldErrors.name ? "name-error" : undefined}
@@ -55,6 +81,8 @@ export function ProjectForm() {
           id="description"
           name="description"
           placeholder="Describe the purpose or scope of this project."
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
           disabled={isPending}
         />
       </div>
@@ -67,7 +95,7 @@ export function ProjectForm() {
 
       <div className="flex flex-wrap justify-end gap-2">
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Creating project..." : "Create project"}
+          {isPending ? pendingLabel : submitLabel}
         </Button>
       </div>
     </form>

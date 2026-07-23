@@ -80,7 +80,17 @@ export default async function ProjectDetailPage({
         eyebrow="Projects"
         title={project.name}
         description="Project information and workspace record."
-        actions={<Badge variant={status.variant}>{status.label}</Badge>}
+        actions={
+          <>
+            <Badge variant={status.variant}>{status.label}</Badge>
+            <Link
+              href={`/projects/${project.id}/edit`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Edit project
+            </Link>
+          </>
+        }
       />
 
       <Card>

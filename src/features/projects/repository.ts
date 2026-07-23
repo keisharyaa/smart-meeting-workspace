@@ -1,4 +1,4 @@
-import type { Project, ProjectFormInput, ProjectListFilters, ProjectUpdate } from "./types";
+import type { Project, ProjectFormInput, ProjectListFilters } from "./types";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -74,9 +74,28 @@ export async function insertProject(ownerId: string, input: ProjectFormInput): P
   return data;
 }
 
-export async function updateProjectRecord(ownerId: string, projectId: string, input: ProjectUpdate): Promise<Project> {
-  void ownerId; void projectId; void input;
-  throw new Error("TODO: implement updateProjectRecord");
+export async function updateProjectRecord(
+  ownerId: string,
+  projectId: string,
+  input: ProjectFormInput,
+): Promise<Project | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .update({
+      name: input.name,
+      description: input.description || null,
+    })
+    .eq("id", projectId)
+    .eq("owner_id", ownerId)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Unable to update project.");
+  }
+
+  return data;
 }
 
 export async function countUnfinishedOfficialActions(ownerId: string, projectId: string): Promise<number> {

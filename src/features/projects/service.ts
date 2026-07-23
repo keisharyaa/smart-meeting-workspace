@@ -1,4 +1,4 @@
-import { insertProject } from "./repository";
+import { insertProject, updateProjectRecord } from "./repository";
 import type { Project, ProjectFormInput } from "./types";
 
 /**
@@ -22,6 +22,21 @@ export async function createProject(ownerId: string, input: ProjectFormInput): P
   }
 
   return insertProject(ownerId, { name, description });
+}
+
+export async function updateProject(
+  ownerId: string,
+  projectId: string,
+  input: ProjectFormInput,
+): Promise<Project | null> {
+  const name = input.name.trim();
+  const description = input.description?.trim() || undefined;
+
+  if (!name) {
+    throw new Error("Project name is required.");
+  }
+
+  return updateProjectRecord(ownerId, projectId, { name, description });
 }
 
 export async function markProjectDone(ownerId: string, projectId: string): Promise<Project> {
