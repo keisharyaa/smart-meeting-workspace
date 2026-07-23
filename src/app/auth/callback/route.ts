@@ -1,23 +1,21 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-/**
- * Supabase Authentication Callback
- *
- * TODO(Keisha):
- * 1. Read the authorization code from the callback URL.
- * 2. Exchange the code for a Supabase session.
- * 3. Redirect successful authentication to `/dashboard`.
- * 4. Redirect failed callbacks to `/login` with a safe error state.
- * 5. Do not expose raw provider errors in the URL.
- */
+import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
-  const redirectUrl = new URL("/login", request.url);
+  const code = request.nextUrl.searchParams.get("code");
 
-  redirectUrl.searchParams.set(
-    "message",
-    "Authentication callback is not implemented yet.",
-  );
+  if (code) {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  const redirectUrl = new URL("/login", request.url);
+  redirectUrl.searchParams.set("error", "confirmation_failed");
 
   return NextResponse.redirect(redirectUrl);
 }

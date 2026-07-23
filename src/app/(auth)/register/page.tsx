@@ -1,19 +1,38 @@
-/**
- * Registration Page
- *
- * TODO(Keisha):
- * 1. Collect full name, email, and password.
- * 2. Validate all inputs before registration.
- * 3. Store full_name in Supabase user metadata.
- * 4. Explain the email-confirmation step when enabled.
- * 5. Display safe success and error states.
- */
+import { redirect } from "next/navigation";
 
-export default function RegisterPage() {
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { RegistrationForm } from "@/features/auth/components/registration-form";
+import { createClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
+
+export default async function RegisterPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/dashboard");
+  }
+
   return (
-    <section>
-      <h1>Create Account</h1>
-      <p>Registration implementation is not available yet.</p>
-    </section>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl">Create account</CardTitle>
+        <CardDescription>
+          Set up your workspace owner profile to start organizing meeting work.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <RegistrationForm />
+      </CardContent>
+    </Card>
   );
 }
