@@ -15,11 +15,12 @@ export const dynamic = "force-dynamic";
 interface LoginPageProps {
   searchParams: Promise<{
     error?: string;
+    message?: string;
   }>;
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
-  const { error } = await searchParams;
+  const { error, message } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -45,6 +46,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           >
             We could not confirm your account. Please try signing in or
             registering again.
+          </p>
+        ) : null}
+        {message === "password_updated" ? (
+          <p
+            role="status"
+            className="mb-5 rounded-md border border-success/20 bg-success-background px-3 py-2 text-sm text-success-foreground"
+          >
+            Your password has been updated. Sign in with your new password.
           </p>
         ) : null}
         <LoginForm />

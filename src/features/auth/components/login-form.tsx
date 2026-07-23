@@ -91,6 +91,15 @@ export function LoginForm() {
         {isPending ? "Signing in..." : "Sign in to workspace"}
       </Button>
 
+      <div className="text-center">
+        <Link
+          href="/forgot-password"
+          className="text-sm font-medium text-primary hover:underline"
+        >
+          Forgot password?
+        </Link>
+      </div>
+
       <p className="text-center text-sm text-muted-foreground">
         Need a workspace account?{" "}
         <Link
