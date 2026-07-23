@@ -1,19 +1,45 @@
-/**
- * Account Settings Page
- *
- * TODO(Keisha):
- * 1. Show full name, current position, and email.
- * 2. Support profile updates.
- * 3. Follow Supabase verification flows for email and password changes.
- * 4. Never display the current password.
- * 5. Preserve existing account data when an update fails.
- */
+import { logoutAction } from "@/features/auth/actions";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
 
-export default function SettingsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function SettingsPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
-    <section>
-      <h1>Account Settings</h1>
-      <p>Account settings implementation is not available yet.</p>
-    </section>
+    <PageContainer>
+      <PageHeader
+        eyebrow="Account"
+        title="Settings"
+        description="Review the account currently connected to this workspace."
+      />
+
+      <Card className="max-w-2xl">
+        <CardHeader>
+          <CardTitle>Workspace account</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div>
+            <p className="text-caption text-muted-foreground">Email address</p>
+            <p className="mt-1 text-sm font-medium text-foreground">
+              {user?.email ?? "Email unavailable"}
+            </p>
+          </div>
+
+          <form action={logoutAction}>
+            <Button type="submit" variant="outline">
+              Sign out
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </PageContainer>
   );
 }
