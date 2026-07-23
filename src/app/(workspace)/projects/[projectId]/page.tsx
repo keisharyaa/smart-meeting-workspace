@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { ProjectLifecycleControls } from "@/features/projects/components/project-lifecycle-controls";
 import { getCurrentUserProject } from "@/features/projects/queries";
 import type { ProjectStatus } from "@/features/projects/types";
 
@@ -89,6 +90,7 @@ export default async function ProjectDetailPage({
             >
               Edit project
             </Link>
+            <ProjectLifecycleControls projectId={project.id} status={project.status} />
           </>
         }
       />

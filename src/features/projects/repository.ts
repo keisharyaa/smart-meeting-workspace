@@ -1,4 +1,9 @@
-import type { Project, ProjectFormInput, ProjectListFilters } from "./types";
+import type {
+  Project,
+  ProjectFormInput,
+  ProjectListFilters,
+  ProjectStatus,
+} from "./types";
 
 import { createClient } from "@/lib/supabase/server";
 
@@ -98,7 +103,42 @@ export async function updateProjectRecord(
   return data;
 }
 
+export async function updateProjectLifecycleRecord(
+  ownerId: string,
+  projectId: string,
+  currentStatuses: ProjectStatus[],
+  update: Pick<Project, "status" | "completed_at" | "archived_at">,
+): Promise<Project | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("projects")
+    .update(update)
+    .eq("id", projectId)
+    .eq("owner_id", ownerId)
+    .in("status", currentStatuses)
+    .select("*")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Unable to update project status.");
+  }
+
+  return data;
+}
+
 export async function countUnfinishedOfficialActions(ownerId: string, projectId: string): Promise<number> {
-  void ownerId; void projectId;
-  return 0;
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("action_items")
+    .select("id", { count: "exact", head: true })
+    .eq("owner_id", ownerId)
+    .eq("project_id", projectId)
+    .eq("is_official", true)
+    .in("status", ["todo", "in_progress", "blocked"]);
+
+  if (error) {
+    throw new Error("Unable to check unfinished action items.");
+  }
+
+  return count ?? 0;
 }
