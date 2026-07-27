@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import { createClient } from "@/lib/supabase/server";
+
 /**
  * Root Route
  *
@@ -8,6 +10,13 @@ import { redirect } from "next/navigation";
  * 2. Redirect authenticated users to `/dashboard`.
  * 3. Replace this temporary redirect after auth session routing is implemented.
  */
-export default function HomePage() {
-  redirect("/login");
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  redirect(user ? "/dashboard" : "/login");
 }

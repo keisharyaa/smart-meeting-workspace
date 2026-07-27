@@ -1,6 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
 
 interface ConfirmationDialogProps {
   title: string;
@@ -8,20 +11,15 @@ interface ConfirmationDialogProps {
   trigger: ReactNode;
   confirmLabel?: string;
   cancelLabel?: string;
-  onConfirm?: () => void;
+  onConfirm?: () => void | Promise<void>;
   destructive?: boolean;
 }
 
 /**
- * Shared confirmation dialog contract.
+ * Shared confirmation dialog.
  *
- * TODO:
- * 1. Implement using the approved shadcn/ui AlertDialog component.
- * 2. Require explicit confirmation for delete, archive, publish,
- *    mark-as-done, and other irreversible actions.
- * 3. Support disabled and loading states while the action runs.
- * 4. Keep the dialog open when the operation fails.
- * 5. Do not place feature business logic inside this component.
+ * Feature owners should keep business rules in their service layer
+ * and pass only the final action callback to this component.
  */
 export function ConfirmationDialog({
   title,
@@ -32,22 +30,102 @@ export function ConfirmationDialog({
   onConfirm,
   destructive = false,
 }: ConfirmationDialogProps) {
-  void destructive;
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+
+  async function handleConfirm() {
+    try {
+      setPending(true);
+      await onConfirm?.();
+      setOpen(false);
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
-    <div>
-      {trigger}
+    <>
+      <span
+        onClick={() => setOpen(true)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setOpen(true);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        className="inline-flex"
+      >
+        {trigger}
+      </span>
 
-      <div hidden>
-        <h2>{title}</h2>
-        <p>{description}</p>
+      {open ? (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirmation-dialog-title"
+          aria-describedby="confirmation-dialog-description"
+        >
+          <button
+            type="button"
+            aria-label="Close confirmation dialog"
+            className="absolute inset-0 bg-foreground/30"
+            onClick={() => {
+              if (!pending) setOpen(false);
+            }}
+          />
 
-        <button type="button">{cancelLabel}</button>
+          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-overlay)]">
+            <div className="flex size-10 items-center justify-center rounded-lg bg-warning-background text-warning">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="size-5"
+              >
+                <path d="M12 3 2.8 19a1.5 1.5 0 0 0 1.3 2.2h15.8a1.5 1.5 0 0 0 1.3-2.2Z" />
+                <path d="M12 9v4M12 17h.01" />
+              </svg>
+            </div>
 
-        <button type="button" onClick={onConfirm}>
-          {confirmLabel}
-        </button>
-      </div>
-    </div>
+            <h2
+              id="confirmation-dialog-title"
+              className="mt-4 text-base font-semibold text-foreground"
+            >
+              {title}
+            </h2>
+            <p
+              id="confirmation-dialog-description"
+              className="mt-2 text-sm leading-6 text-muted-foreground"
+            >
+              {description}
+            </p>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={pending}
+              >
+                {cancelLabel}
+              </Button>
+              <Button
+                variant={destructive ? "destructive" : "default"}
+                onClick={handleConfirm}
+                disabled={pending}
+              >
+                {pending ? "Processing..." : confirmLabel}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

@@ -40,6 +40,7 @@ erDiagram
 - `due_time` may be null while `due_date` exists.
 - Missing due date must remain null.
 - Draft publication must be transactional.
+- New Auth users create their profile atomically from approved registration metadata.
 
 ## RLS Strategy
 

@@ -1,39 +1,44 @@
 import type { ReactNode } from "react";
+import { redirect } from "next/navigation";
 
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { PageContainer } from "@/components/layout/page-container";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Workspace Layout
  *
- * TODO:
+ * TODO(auth owner):
  * 1. Verify the authenticated user on the server.
  * 2. Redirect unauthenticated users to `/login`.
- * 3. Render responsive sidebar and header behavior.
- * 4. Keep page-specific data fetching inside each feature query.
- * 5. Do not query feature tables directly from this layout.
+ * 3. Pass authenticated profile data to the header.
+ *
+ * Page-specific data fetching remains inside each route or
+ * feature query.
  */
-
 interface WorkspaceLayoutProps {
   children: ReactNode;
 }
 
-export default function WorkspaceLayout({
+export default async function WorkspaceLayout({
   children,
 }: WorkspaceLayoutProps) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
-    <div className="min-h-screen">
-      <aside>
-        <AppSidebar />
-      </aside>
+    <div className="workspace-grid">
+      <AppSidebar />
 
-      <div>
+      <div className="min-w-0">
         <AppHeader />
-
-        <PageContainer>
-          <main>{children}</main>
-        </PageContainer>
+        <main>{children}</main>
       </div>
     </div>
   );
