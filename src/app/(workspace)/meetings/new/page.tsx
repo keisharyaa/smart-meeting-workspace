@@ -1,22 +1,47 @@
-/**
- * New Meeting Page
- *
- * TODO(Keisha):
- * 1. Render the meeting intake form.
- * 2. Allow multiple PDF, DOCX, and TXT files.
- * 3. Allow pasted text together with uploaded files.
- * 4. Require at least one valid source.
- * 5. Preserve source order.
- * 6. Save meeting and sources as draft records.
- * 7. Continue to Human Review only after persistence succeeds.
- * 8. Do not assume one meeting has only one source.
- */
+import Link from "next/link";
 
-export default function NewMeetingPage() {
+import { MeetingIntakeForm } from "@/components/meetings/meeting-intake-form";
+import { ErrorState } from "@/components/feedback/error-state";
+import { PageContainer } from "@/components/layout/page-container";
+import { PageHeader } from "@/components/layout/page-header";
+import { Button } from "@/components/ui/button";
+import { getCurrentUserActiveProjects } from "@/features/meetings/queries";
+export const dynamic = "force-dynamic"; 
+export const metadata = {
+  title: "New Meeting",
+};
+
+export default async function NewMeetingPage() {
+  const { projects, error } = await getCurrentUserActiveProjects();
+
   return (
-    <section>
-      <h1>New Meeting</h1>
-      <p>Meeting intake implementation is not available yet.</p>
-    </section>
+    <PageContainer>
+      <PageHeader
+        eyebrow="Meetings"
+        title="Add meeting notes"
+        description="Capture meeting context and preserve every original source before continuing to Human Review."
+        actions={
+          <Button variant="outline" render={<Link href="/meetings" />}>
+            Back to Meetings
+          </Button>
+        }
+      />
+
+      {error ? (
+        <ErrorState message={error} />
+      ) : projects.length === 0 ? (
+        <ErrorState
+          title="An active project is required"
+          message="Create or restore an Active project before adding a meeting."
+          action={
+            <Button render={<Link href="/projects/new" />}>
+              Create Project
+            </Button>
+          }
+        />
+      ) : (
+        <MeetingIntakeForm projects={projects} />
+      )}
+    </PageContainer>
   );
 }
