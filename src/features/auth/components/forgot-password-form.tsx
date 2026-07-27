@@ -9,8 +9,20 @@ import { createClient } from "@/lib/supabase/client";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
+interface ForgotPasswordFormProps {
+  initialEmail?: string;
+  showLoginLink?: boolean;
+  completeLinkHref?: string;
+  completeLinkLabel?: string;
+}
+
+export function ForgotPasswordForm({
+  initialEmail = "",
+  showLoginLink = true,
+  completeLinkHref = "/login",
+  completeLinkLabel = "Back to Login",
+}: ForgotPasswordFormProps) {
+  const [email, setEmail] = useState(initialEmail);
   const [message, setMessage] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
@@ -75,10 +87,10 @@ export function ForgotPasswordForm() {
           If an account exists for this email, we have sent a password reset link.
         </p>
         <Link
-          href="/login"
+          href={completeLinkHref}
           className="inline-flex text-sm font-medium text-primary hover:underline"
         >
-          Back to Login
+          {completeLinkLabel}
         </Link>
       </div>
     );
@@ -126,12 +138,14 @@ export function ForgotPasswordForm() {
         {isPending ? "Sending reset link..." : "Send reset link"}
       </Button>
 
-      <p className="text-center text-sm text-muted-foreground">
-        Remembered your password?{" "}
-        <Link href="/login" className="font-medium text-primary hover:underline">
-          Back to Login
-        </Link>
-      </p>
+      {showLoginLink ? (
+        <p className="text-center text-sm text-muted-foreground">
+          Remembered your password?{" "}
+          <Link href="/login" className="font-medium text-primary hover:underline">
+            Back to Login
+          </Link>
+        </p>
+      ) : null}
     </form>
   );
 }

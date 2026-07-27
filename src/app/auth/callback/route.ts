@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
-const allowedNextPaths = new Set(["/dashboard"]);
+const allowedNextPaths = new Set(["/dashboard", "/settings"]);
 
 function getSafeNextPath(nextPath: string | null) {
   return nextPath && allowedNextPaths.has(nextPath) ? nextPath : "/dashboard";
