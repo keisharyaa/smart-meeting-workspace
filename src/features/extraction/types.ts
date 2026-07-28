@@ -2,9 +2,11 @@ export interface ExtractedActionItem {
   title: string;
   description: string | null;
   picName: string | null;
+  picEmail: string | null;
   dueDate: string | null;
   dueTime: string | null;
   priority: "low" | "medium" | "high" | null;
+  clarificationStatus: "clear" | "needs_clarification";
   sourceReference: string | null;
 }
 

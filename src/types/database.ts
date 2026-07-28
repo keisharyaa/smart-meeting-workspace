@@ -161,6 +161,183 @@ export type Database = {
           },
         ]
       }
+      meeting_review_action_items: {
+        Row: {
+          clarification_status: string
+          created_at: string
+          description: string | null
+          display_order: number
+          due_date: string | null
+          due_time: string | null
+          id: string
+          meeting_id: string
+          owner_id: string
+          pic_email: string | null
+          pic_name: string | null
+          priority: Database["public"]["Enums"]["action_item_priority"] | null
+          project_id: string
+          review_draft_id: string
+          source_reference: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          clarification_status: string
+          created_at?: string
+          description?: string | null
+          display_order: number
+          due_date?: string | null
+          due_time?: string | null
+          id?: string
+          meeting_id: string
+          owner_id: string
+          pic_email?: string | null
+          pic_name?: string | null
+          priority?: Database["public"]["Enums"]["action_item_priority"] | null
+          project_id: string
+          review_draft_id: string
+          source_reference?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Update: {
+          clarification_status?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          due_date?: string | null
+          due_time?: string | null
+          id?: string
+          meeting_id?: string
+          owner_id?: string
+          pic_email?: string | null
+          pic_name?: string | null
+          priority?: Database["public"]["Enums"]["action_item_priority"] | null
+          project_id?: string
+          review_draft_id?: string
+          source_reference?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_review_action_items_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_review_action_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_review_action_items_review_draft_id_fkey"
+            columns: ["review_draft_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_review_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_review_drafts: {
+        Row: {
+          created_at: string
+          id: string
+          meeting_id: string
+          owner_id: string
+          processing_method: string
+          source_extraction_run_id: string | null
+          summary: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meeting_id: string
+          owner_id: string
+          processing_method: string
+          source_extraction_run_id?: string | null
+          summary?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          owner_id?: string
+          processing_method?: string
+          source_extraction_run_id?: string | null
+          summary?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_review_drafts_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: true
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_review_drafts_source_extraction_run_id_fkey"
+            columns: ["source_extraction_run_id"]
+            isOneToOne: false
+            referencedRelation: "extraction_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meeting_review_outcomes: {
+        Row: {
+          content: string
+          created_at: string
+          display_order: number
+          id: string
+          outcome_type: Database["public"]["Enums"]["outcome_type"]
+          owner_id: string
+          review_draft_id: string
+          source_reference: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          display_order: number
+          id?: string
+          outcome_type: Database["public"]["Enums"]["outcome_type"]
+          owner_id: string
+          review_draft_id: string
+          source_reference?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          outcome_type?: Database["public"]["Enums"]["outcome_type"]
+          owner_id?: string
+          review_draft_id?: string
+          source_reference?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_review_outcomes_review_draft_id_fkey"
+            columns: ["review_draft_id"]
+            isOneToOne: false
+            referencedRelation: "meeting_review_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       meeting_outcomes: {
         Row: {
           content: string
@@ -456,7 +633,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      initialize_meeting_review_draft: {
+        Args: {
+          draft_actions: Json
+          draft_method: string
+          draft_outcomes: Json
+          draft_summary: string
+          extraction_run_id?: string | null
+          target_meeting_id: string
+        }
+        Returns: string
+      }
+      save_meeting_review_draft: {
+        Args: {
+          draft_actions: Json
+          draft_id: string
+          draft_method: string
+          draft_outcomes: Json
+          draft_summary: string
+          expected_version: number
+          extraction_run_id?: string | null
+        }
+        Returns: number
+      }
     }
     Enums: {
       action_item_priority: "low" | "medium" | "high"

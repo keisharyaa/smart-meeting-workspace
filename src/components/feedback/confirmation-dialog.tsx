@@ -1,14 +1,22 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ReactElement } from "react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogRoot,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface ConfirmationDialogProps {
   title: string;
   description: string;
-  trigger: ReactNode;
+  trigger: ReactElement;
   confirmLabel?: string;
   cancelLabel?: string;
   onConfirm?: () => void | Promise<void>;
@@ -44,40 +52,14 @@ export function ConfirmationDialog({
   }
 
   return (
-    <>
-      <span
-        onClick={() => setOpen(true)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            setOpen(true);
-          }
-        }}
-        role="button"
-        tabIndex={0}
-        className="inline-flex"
-      >
-        {trigger}
-      </span>
-
-      {open ? (
-        <div
-          className="fixed inset-0 z-[70] flex items-center justify-center px-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="confirmation-dialog-title"
-          aria-describedby="confirmation-dialog-description"
-        >
-          <button
-            type="button"
-            aria-label="Close confirmation dialog"
-            className="absolute inset-0 bg-foreground/30"
-            onClick={() => {
-              if (!pending) setOpen(false);
-            }}
-          />
-
-          <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-overlay)]">
+    <DialogRoot
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!pending) setOpen(nextOpen);
+      }}
+    >
+      <DialogTrigger render={trigger} />
+      <DialogContent>
             <div className="flex size-10 items-center justify-center rounded-lg bg-warning-background text-warning">
               <svg
                 viewBox="0 0 24 24"
@@ -94,27 +76,19 @@ export function ConfirmationDialog({
               </svg>
             </div>
 
-            <h2
-              id="confirmation-dialog-title"
-              className="mt-4 text-base font-semibold text-foreground"
-            >
+            <DialogTitle className="mt-4 text-base font-semibold text-foreground">
               {title}
-            </h2>
-            <p
-              id="confirmation-dialog-description"
-              className="mt-2 text-sm leading-6 text-muted-foreground"
-            >
+            </DialogTitle>
+            <DialogDescription className="mt-2 text-sm leading-6 text-muted-foreground">
               {description}
-            </p>
+            </DialogDescription>
 
             <div className="mt-6 flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={pending}
+              <DialogClose
+                render={<Button variant="outline" disabled={pending} />}
               >
                 {cancelLabel}
-              </Button>
+              </DialogClose>
               <Button
                 variant={destructive ? "destructive" : "default"}
                 onClick={handleConfirm}
@@ -123,9 +97,7 @@ export function ConfirmationDialog({
                 {pending ? "Processing..." : confirmLabel}
               </Button>
             </div>
-          </div>
-        </div>
-      ) : null}
-    </>
+      </DialogContent>
+    </DialogRoot>
   );
 }

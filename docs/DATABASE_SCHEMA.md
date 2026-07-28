@@ -10,6 +10,9 @@ erDiagram
     PROJECTS ||--o{ MEETINGS : contains
     MEETINGS ||--o{ MEETING_SOURCES : has
     MEETINGS ||--o{ EXTRACTION_RUNS : processed_by
+    MEETINGS ||--o| MEETING_REVIEW_DRAFTS : reviewed_in
+    MEETING_REVIEW_DRAFTS ||--o{ MEETING_REVIEW_OUTCOMES : contains
+    MEETING_REVIEW_DRAFTS ||--o{ MEETING_REVIEW_ACTION_ITEMS : contains
     MEETINGS ||--|| MEETING_OUTCOMES : publishes
     PROJECTS ||--o{ ACTION_ITEMS : contains
     MEETINGS ||--o{ ACTION_ITEMS : produces
@@ -25,6 +28,9 @@ erDiagram
 - `meetings`: project, title, date, participants, status, publication status
 - `meeting_sources`: file or pasted text, storage path, raw text, source order
 - `extraction_runs`: provider, model, status, raw and validated output, timing, errors
+- `meeting_review_drafts`: current unofficial review method, summary, source extraction, and optimistic version
+- `meeting_review_outcomes`: ordered unofficial decisions, blockers, and unresolved questions
+- `meeting_review_action_items`: ordered unofficial action rows with PIC, deadline, priority, clarification, and source data
 - `meeting_outcomes`: summary, decisions, blockers, unresolved questions, review method and status
 - `action_items`: project, meeting, title, description, PIC, deadline, priority, status, source reference, official flag
 - `notifications`: action item, reminder type, read state
@@ -40,6 +46,8 @@ erDiagram
 - `due_time` may be null while `due_date` exists.
 - Missing due date must remain null.
 - Draft publication must be transactional.
+- Human Review drafts remain in dedicated tables and never affect official-module queries.
+- Full review-draft saves replace child collections atomically and reject stale versions.
 - New Auth users create their profile atomically from approved registration metadata.
 
 ## RLS Strategy
