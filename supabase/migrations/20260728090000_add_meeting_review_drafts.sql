@@ -124,21 +124,37 @@ with check (
 );
 
 create policy "Users can manage their own meeting review actions"
-on public.meeting_review_action_items for all to authenticated
+on public.meeting_review_action_items
+for all
+to authenticated
 using (
   owner_id = (select auth.uid())
   and exists (
-    select 1 from public.meeting_review_drafts
-    where meeting_review_drafts.id = review_draft_id
-      and meeting_review_drafts.owner_id = (select auth.uid())
+    select 1
+    from public.meeting_review_drafts as draft
+    join public.meetings as meeting
+      on meeting.id = draft.meeting_id
+    where draft.id = review_draft_id
+      and draft.owner_id = (select auth.uid())
+      and meeting.owner_id = (select auth.uid())
+      and meeting.is_published = false
+      and meeting.id = meeting_review_action_items.meeting_id
+      and meeting.project_id = meeting_review_action_items.project_id
   )
 )
 with check (
   owner_id = (select auth.uid())
   and exists (
-    select 1 from public.meeting_review_drafts
-    where meeting_review_drafts.id = review_draft_id
-      and meeting_review_drafts.owner_id = (select auth.uid())
+    select 1
+    from public.meeting_review_drafts as draft
+    join public.meetings as meeting
+      on meeting.id = draft.meeting_id
+    where draft.id = review_draft_id
+      and draft.owner_id = (select auth.uid())
+      and meeting.owner_id = (select auth.uid())
+      and meeting.is_published = false
+      and meeting.id = meeting_review_action_items.meeting_id
+      and meeting.project_id = meeting_review_action_items.project_id
   )
 );
 
