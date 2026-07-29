@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authConfig } from "@/config/auth";
 import { createClient } from "@/lib/supabase/client";
 
@@ -94,9 +94,8 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
         <label htmlFor="currentPassword" className="text-sm font-medium text-foreground">
           Current password <span className="text-destructive">*</span>
         </label>
-        <Input
+        <PasswordInput
           id="currentPassword"
-          type="password"
           autoComplete="current-password"
           value={currentPassword}
           onChange={(event) => setCurrentPassword(event.target.value)}
@@ -115,9 +114,8 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
         <label htmlFor="settingsNewPassword" className="text-sm font-medium text-foreground">
           New password <span className="text-destructive">*</span>
         </label>
-        <Input
+        <PasswordInput
           id="settingsNewPassword"
-          type="password"
           autoComplete="new-password"
           minLength={authConfig.minimumPasswordLength}
           value={newPassword}
@@ -140,9 +138,8 @@ export function ChangePasswordForm({ email }: ChangePasswordFormProps) {
         <label htmlFor="confirmNewPassword" className="text-sm font-medium text-foreground">
           Confirm new password <span className="text-destructive">*</span>
         </label>
-        <Input
+        <PasswordInput
           id="confirmNewPassword"
-          type="password"
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}

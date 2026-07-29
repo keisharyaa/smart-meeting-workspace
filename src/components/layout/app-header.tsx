@@ -11,7 +11,20 @@ import { MobileNavigation } from "./mobile-navigation";
  * by their feature owners. This component currently provides a
  * consistent, build-safe visual contract.
  */
-export function AppHeader() {
+interface AppHeaderProps {
+  fullName?: string;
+}
+
+export function AppHeader({ fullName }: AppHeaderProps) {
+  const trimmedName = fullName?.trim();
+  const displayName = trimmedName || "Workspace Owner";
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "WO";
+
   return (
     <header className="sticky top-0 z-30 flex h-[var(--header-height)] items-center justify-between border-b border-border bg-card/95 px-[var(--page-padding-x)] backdrop-blur-sm">
       <div className="flex min-w-0 items-center gap-3">
@@ -53,11 +66,11 @@ export function AppHeader() {
           className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted"
         >
           <span className="flex size-8 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">
-            WO
+            {initials}
           </span>
           <span className="hidden text-left md:block">
             <span className="block text-xs font-semibold text-foreground">
-              Workspace Owner
+              {displayName}
             </span>
             <span className="block text-[0.6875rem] text-muted-foreground">
               Account settings

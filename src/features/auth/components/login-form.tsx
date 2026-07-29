@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 
 import { loginAction, type LoginActionState } from "../actions";
 
@@ -53,10 +54,9 @@ export function LoginForm() {
         >
           Password <span className="text-destructive">*</span>
         </label>
-        <Input
+        <PasswordInput
           id="password"
           name="password"
-          type="password"
           autoComplete="current-password"
           placeholder="Enter your password"
           required
