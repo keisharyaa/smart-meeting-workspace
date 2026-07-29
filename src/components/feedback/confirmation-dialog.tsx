@@ -90,6 +90,7 @@ export function ConfirmationDialog({
                 {cancelLabel}
               </DialogClose>
               <Button
+                type="button"
                 variant={destructive ? "destructive" : "default"}
                 onClick={handleConfirm}
                 disabled={pending}

@@ -7,7 +7,11 @@ import {
   getCurrentReviewDraft,
 } from "@/features/review-drafts/service";
 
-import { generateExtraction } from "./gemini-client";
+import {
+  GeminiConfigurationError,
+  generateExtraction,
+  getConfiguredGeminiModel,
+} from "./gemini-client";
 import { normalizeExtractionResult } from "./normalizer";
 import {
   createExtractionRun,
@@ -45,24 +49,26 @@ export async function extractMeetingOutcomes(
   if (error) throw new Error("Unable to load the Original Meeting Notes.");
 
   const assembled = assembleMeetingSources(meeting, sources ?? []);
-  const model = process.env.GEMINI_MODEL ?? "not-configured";
+  const requestedModel = getConfiguredGeminiModel();
   const startedAt = Date.now();
   const runId = await createExtractionRun({
     ownerId,
     meetingId,
-    model,
+    model: requestedModel,
     characterCount: assembled.characterCount,
   });
 
   try {
     await markExtractionProcessing(ownerId, runId);
-    const providerOutput = await generateExtraction(assembled.content);
+    const providerResult = await generateExtraction(assembled.content);
+    const providerOutput = providerResult.output;
     const validated = extractionResultSchema.parse(providerOutput);
     const output = normalizeExtractionResult(validated);
 
     await markExtractionSucceeded({
       ownerId,
       runId,
+      model: providerResult.model,
       output: output as unknown as Json,
       durationMs: Date.now() - startedAt,
     });
@@ -78,8 +84,8 @@ export async function extractMeetingOutcomes(
       initializedDraft: !existingDraft,
     };
   } catch (error) {
-    const safeMessage =
-      "AI processing could not be completed. Your Original Meeting Notes and saved draft remain unchanged.";
+    console.error("AI extraction failed:", error);
+    const safeMessage = getSafeExtractionMessage(error);
     try {
       await markExtractionFailed({
         ownerId,
@@ -87,6 +93,7 @@ export async function extractMeetingOutcomes(
         code: getFailureCode(error),
         message: safeMessage,
         durationMs: Date.now() - startedAt,
+        model: requestedModel,
       });
     } catch (loggingError) {
       console.error("Unable to record extraction failure:", loggingError);
@@ -96,11 +103,23 @@ export async function extractMeetingOutcomes(
 }
 
 function getFailureCode(error: unknown) {
-  if (error instanceof Error && error.name === "GeminiConfigurationError") {
+  if (error instanceof GeminiConfigurationError) {
     return "provider_not_configured";
   }
   if (error instanceof Error && error.name === "ZodError") {
     return "invalid_structured_output";
   }
   return "provider_failure";
+}
+
+function getSafeExtractionMessage(error: unknown) {
+  if (error instanceof GeminiConfigurationError) {
+    return error.message;
+  }
+
+  if (error instanceof Error && error.name === "ZodError") {
+    return "The AI response format was invalid. Try again or continue manually.";
+  }
+
+  return "AI processing could not be completed. Your Original Meeting Notes and saved draft remain unchanged.";
 }

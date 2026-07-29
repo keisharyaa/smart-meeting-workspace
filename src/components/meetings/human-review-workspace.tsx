@@ -265,7 +265,7 @@ export function HumanReviewWorkspace({
           <div aria-live="polite">
             {dirty ? <span className="text-sm text-warning-foreground">Unsaved changes</span> : <span className="text-helper">{draft ? "Draft progress is saved." : "Select a processing method to begin."}</span>}
           </div>
-          <Button className="w-full sm:w-auto" size="lg" disabled={!draft || saving || !dirty} onClick={saveDraft}>
+          <Button type="button" className="w-full sm:w-auto" size="lg" disabled={!draft || saving || !dirty} onClick={saveDraft}>
             {saving ? <Loader2 className="animate-spin" /> : <Save />}
             {saving ? "Saving draft..." : "Save Draft"}
           </Button>

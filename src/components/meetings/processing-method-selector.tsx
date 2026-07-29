@@ -40,7 +40,7 @@ export function ProcessingMethodSelector({
           <p className="text-helper mt-1">
             Generate an editable draft from the Original Meeting Notes.
           </p>
-          <Button className="mt-4 w-full sm:w-auto" onClick={onAi} disabled={processing}>
+          <Button type="button" className="mt-4 w-full sm:w-auto" onClick={onAi} disabled={processing}>
             {processing ? <Loader2 className="animate-spin" /> : <Sparkles />}
             {processing ? "Processing meeting notes..." : selected === "ai" ? "Retry Extraction" : "Process with AI"}
           </Button>
@@ -54,7 +54,7 @@ export function ProcessingMethodSelector({
           <p className="text-helper mt-1">
             Start with empty review sections or continue editing the current draft.
           </p>
-          <Button variant="secondary" className="mt-4 w-full sm:w-auto" onClick={onManual} disabled={processing}>
+          <Button type="button" variant="secondary" className="mt-4 w-full sm:w-auto" onClick={onManual} disabled={processing}>
             <PencilLine />
             Continue Manually
           </Button>

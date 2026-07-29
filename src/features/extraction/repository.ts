@@ -38,9 +38,11 @@ export async function markExtractionSucceeded(input: {
   runId: string;
   output: Json;
   durationMs: number;
+  model?: string;
 }) {
   await updateRun(input.ownerId, input.runId, {
     status: "success",
+    model: input.model,
     normalized_output: input.output,
     duration_ms: input.durationMs,
     completed_at: new Date().toISOString(),
@@ -55,9 +57,11 @@ export async function markExtractionFailed(input: {
   code: string;
   message: string;
   durationMs: number;
+  model?: string;
 }) {
   await updateRun(input.ownerId, input.runId, {
     status: "failed",
+    model: input.model,
     duration_ms: input.durationMs,
     completed_at: new Date().toISOString(),
     error_code: input.code,
