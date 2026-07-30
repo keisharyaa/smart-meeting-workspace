@@ -79,7 +79,7 @@ export async function extractMeetingOutcomes(
     };
   } catch (error) {
     const safeMessage =
-      "JSON.stringify(error)";
+      JSON.stringify(error);
     try {
       await markExtractionFailed({
         ownerId,
