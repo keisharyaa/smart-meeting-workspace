@@ -79,7 +79,7 @@ export async function extractMeetingOutcomes(
     };
   } catch (error) {
     const safeMessage =
-      "AI processing could not be completed. Your Original Meeting Notes and saved draft remain unchanged.";
+      "JSON.stringify(error)";
     try {
       await markExtractionFailed({
         ownerId,
