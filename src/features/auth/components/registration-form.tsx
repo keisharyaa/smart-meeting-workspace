@@ -5,6 +5,7 @@ import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authConfig } from "@/config/auth";
 
 import {
@@ -148,10 +149,9 @@ export function RegistrationForm() {
         >
           Password <span className="text-destructive">*</span>
         </label>
-        <Input
+        <PasswordInput
           id="registrationPassword"
           name="password"
-          type="password"
           autoComplete="new-password"
           placeholder={`At least ${authConfig.minimumPasswordLength} characters`}
           minLength={authConfig.minimumPasswordLength}

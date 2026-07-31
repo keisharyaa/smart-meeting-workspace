@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { getReviewDraft } from "@/features/review-drafts/repository";
+import type { ReviewDraft } from "@/features/review-drafts/types";
 
 import type { MeetingDraftWithSources } from "./types";
 
@@ -8,7 +10,12 @@ const uuidPattern =
 export async function getCurrentUserMeetingDraft(
   meetingId: string,
 ): Promise<{
-  data: MeetingDraftWithSources | null;
+  data:
+    | (MeetingDraftWithSources & {
+        projectName: string;
+        reviewDraft: ReviewDraft | null;
+      })
+    | null;
   error: string | null;
 }> {
   if (!uuidPattern.test(meetingId)) {
@@ -56,8 +63,24 @@ export async function getCurrentUserMeetingDraft(
       throw sourcesError;
     }
 
+    const { data: project, error: projectError } = await supabase
+      .from("projects")
+      .select("name")
+      .eq("id", meeting.project_id)
+      .eq("owner_id", user.id)
+      .single();
+
+    if (projectError) throw projectError;
+
+    const reviewDraft = await getReviewDraft(user.id, meetingId);
+
     return {
-      data: { meeting, sources: sources ?? [] },
+      data: {
+        meeting,
+        sources: sources ?? [],
+        projectName: project.name,
+        reviewDraft,
+      },
       error: null,
     };
   } catch (error) {

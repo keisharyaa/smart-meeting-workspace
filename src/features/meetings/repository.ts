@@ -5,6 +5,7 @@ import type {
   Meeting,
   MeetingSource,
   MeetingMetadataInput,
+  PublishedMeetingListItem,
 } from "./types";
 
 export async function listActiveProjects(
@@ -123,6 +124,74 @@ export async function getOwnedMeetingDraft(
   }
 
   return data;
+}
+
+export async function listPublishedMeetings(
+  ownerId: string,
+): Promise<PublishedMeetingListItem[]> {
+  const supabase = await createClient();
+
+  const { data: meetings, error: meetingsError } = await supabase
+    .from("meetings")
+    .select("id, title, project_id, meeting_date, meeting_time, participants, status, approved_summary, published_at, updated_at, created_at, owner_id, is_published")
+    .eq("owner_id", ownerId)
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
+    .order("updated_at", { ascending: false });
+
+  if (meetingsError) {
+    throw new Error("Unable to load published meetings.");
+  }
+
+  if (!meetings || meetings.length === 0) {
+    return [];
+  }
+
+  const projectIds = [...new Set(meetings.map((meeting) => meeting.project_id))];
+  const meetingIds = meetings.map((meeting) => meeting.id);
+
+  const [
+    { data: projects, error: projectsError },
+    { data: officialActionItems, error: officialActionItemsError },
+  ] = await Promise.all([
+    supabase
+      .from("projects")
+      .select("id, name")
+      .eq("owner_id", ownerId)
+      .in("id", projectIds),
+    supabase
+      .from("action_items")
+      .select("meeting_id")
+      .eq("owner_id", ownerId)
+      .eq("is_official", true)
+      .in("meeting_id", meetingIds),
+  ]);
+
+  if (projectsError || officialActionItemsError) {
+    throw new Error("Unable to load meeting records.");
+  }
+
+  const projectNameById = new Map(
+    (projects ?? []).map((project) => [project.id, project.name]),
+  );
+  const actionItemCountByMeetingId = new Map<string, number>();
+
+  for (const actionItem of officialActionItems ?? []) {
+    if (!actionItem.meeting_id) {
+      continue;
+    }
+
+    actionItemCountByMeetingId.set(
+      actionItem.meeting_id,
+      (actionItemCountByMeetingId.get(actionItem.meeting_id) ?? 0) + 1,
+    );
+  }
+
+  return meetings.map((meeting) => ({
+    meeting,
+    projectName: projectNameById.get(meeting.project_id) ?? "Unknown project",
+    officialActionItemCount: actionItemCountByMeetingId.get(meeting.id) ?? 0,
+  }));
 }
 
 type DatabaseMeetingSourceInsert = {

@@ -63,12 +63,20 @@ export default async function EditProjectPage({ params }: EditProjectPageProps) 
         title="Edit project"
         description={`Update details for ${project.name}.`}
         actions={
-          <Link
-            href={`/projects/${project.id}`}
-            className={buttonVariants({ variant: "outline" })}
-          >
-            Cancel
-          </Link>
+          <>
+            <Link
+              href="/projects"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Back to Projects
+            </Link>
+            <Link
+              href={`/projects/${project.id}`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Cancel
+            </Link>
+          </>
         }
       />
 

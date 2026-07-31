@@ -32,12 +32,21 @@ export default async function WorkspaceLayout({
     redirect("/login");
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const fullName =
+    profile?.full_name?.trim() || user.user_metadata.full_name || null;
+
   return (
     <div className="workspace-grid">
       <AppSidebar />
 
       <div className="min-w-0">
-        <AppHeader />
+        <AppHeader fullName={fullName} />
         <main>{children}</main>
       </div>
     </div>

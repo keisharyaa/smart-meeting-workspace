@@ -83,6 +83,12 @@ export default async function ProjectDetailPage({
         description="Project information and workspace record."
         actions={
           <>
+            <Link
+              href="/projects"
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Back to Projects
+            </Link>
             <Badge variant={status.variant}>{status.label}</Badge>
             <Link
               href={`/projects/${project.id}/edit`}
