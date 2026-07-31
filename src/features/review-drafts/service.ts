@@ -109,6 +109,7 @@ export async function saveCurrentReview(
       description: normalizeNullable(action.description),
       picName: normalizeNullable(action.picName),
       picEmail: normalizeNullable(action.picEmail),
+      picRole: normalizeNullable(action.picRole),
       dueTime: action.dueDate ? action.dueTime : null,
       sourceReference: normalizeNullable(action.sourceReference),
       displayOrder: index,
@@ -151,6 +152,7 @@ function extractionActions(
     projectId: meeting.project_id,
     meetingId: meeting.id,
     ...item,
+    picRole: null,
     displayOrder: index,
   }));
 }

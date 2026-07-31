@@ -153,6 +153,7 @@ function mapAction(row: {
   description: string | null;
   pic_name: string | null;
   pic_email: string | null;
+  pic_role: string | null;
   due_date: string | null;
   due_time: string | null;
   priority: "low" | "medium" | "high" | null;
@@ -168,6 +169,7 @@ function mapAction(row: {
     description: row.description,
     picName: row.pic_name,
     picEmail: row.pic_email,
+    picRole: row.pic_role,
     dueDate: row.due_date,
     dueTime: row.due_time?.slice(0, 5) ?? null,
     priority: row.priority,

@@ -18,6 +18,7 @@ export interface ReviewActionItem {
   description: string | null;
   picName: string | null;
   picEmail: string | null;
+  picRole: string | null;
   dueDate: string | null;
   dueTime: string | null;
   priority: "low" | "medium" | "high" | null;

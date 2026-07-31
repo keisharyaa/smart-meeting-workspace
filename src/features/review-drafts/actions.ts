@@ -42,6 +42,7 @@ const saveSchema = z.object({
       description: z.string().max(10_000).nullable(),
       picName: z.string().max(500).nullable(),
       picEmail: z.union([z.string().email(), z.literal(""), z.null()]),
+      picRole: z.string().max(500).nullable(),
       dueDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.null()]),
       dueTime: z.union([z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/), z.null()]),
       priority: z.enum(["low", "medium", "high"]).nullable(),

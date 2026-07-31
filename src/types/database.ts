@@ -174,6 +174,7 @@ export type Database = {
           owner_id: string
           pic_email: string | null
           pic_name: string | null
+          pic_role: string | null
           priority: Database["public"]["Enums"]["action_item_priority"] | null
           project_id: string
           review_draft_id: string
@@ -193,6 +194,7 @@ export type Database = {
           owner_id: string
           pic_email?: string | null
           pic_name?: string | null
+          pic_role?: string | null
           priority?: Database["public"]["Enums"]["action_item_priority"] | null
           project_id: string
           review_draft_id: string
@@ -212,6 +214,7 @@ export type Database = {
           owner_id?: string
           pic_email?: string | null
           pic_name?: string | null
+          pic_role?: string | null
           priority?: Database["public"]["Enums"]["action_item_priority"] | null
           project_id?: string
           review_draft_id?: string

@@ -162,6 +162,7 @@ export function HumanReviewWorkspace({
         description: action.description,
         picName: action.picName,
         picEmail: action.picEmail,
+        picRole: action.picRole,
         dueDate: action.dueDate,
         dueTime: action.dueTime,
         priority: action.priority,

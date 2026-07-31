@@ -30,7 +30,7 @@ erDiagram
 - `extraction_runs`: provider, model, status, raw and validated output, timing, errors
 - `meeting_review_drafts`: current unofficial review method, summary, source extraction, and optimistic version
 - `meeting_review_outcomes`: ordered unofficial decisions, blockers, and unresolved questions
-- `meeting_review_action_items`: ordered unofficial action rows with PIC, deadline, priority, clarification, and source data
+- `meeting_review_action_items`: ordered unofficial action rows with PIC name, PIC email, optional PIC role, deadline, priority, clarification, and source data
 - `meeting_outcomes`: summary, decisions, blockers, unresolved questions, review method and status
 - `action_items`: project, meeting, title, description, PIC, deadline, priority, status, source reference, official flag
 - `notifications`: action item, reminder type, read state

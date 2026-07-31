@@ -50,6 +50,7 @@ export function DraftActionItemsEditor({
         description: null,
         picName: null,
         picEmail: null,
+        picRole: null,
         dueDate: null,
         dueTime: null,
         priority: null,

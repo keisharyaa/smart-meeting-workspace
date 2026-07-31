@@ -58,6 +58,7 @@ export function DraftActionItemRow({
           <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2 lg:grid-cols-4">
             <div><dt className="text-caption text-muted-foreground">Project</dt><dd>{projectName}</dd></div>
             <div><dt className="text-caption text-muted-foreground">PIC</dt><dd>{item.picName ?? "Unknown"}</dd></div>
+            <div><dt className="text-caption text-muted-foreground">PIC role</dt><dd>{item.picRole ?? "Not Mentioned"}</dd></div>
             <div><dt className="text-caption text-muted-foreground">Deadline</dt><dd>{deadline}</dd></div>
             <div><dt className="text-caption text-muted-foreground">Priority</dt><dd className="capitalize">{item.priority ?? "Not Mentioned"}</dd></div>
           </dl>
@@ -96,6 +97,9 @@ export function DraftActionItemRow({
           </Field>
           <Field id={`${prefix}-email`} label="PIC email" helper="Optional.">
             <Input id={`${prefix}-email`} type="email" value={item.picEmail ?? ""} disabled={disabled} onChange={(event) => field("picEmail", event.target.value || null)} />
+          </Field>
+          <Field id={`${prefix}-role`} label="PIC role" helper="Optional. Add a role when it is mentioned in the meeting notes.">
+            <Input id={`${prefix}-role`} value={item.picRole ?? ""} disabled={disabled} placeholder="Product Manager" onChange={(event) => field("picRole", event.target.value || null)} />
           </Field>
           <Field id={`${prefix}-date`} label="Deadline date" helper="Leave blank when not mentioned.">
             <Input id={`${prefix}-date`} type="date" value={item.dueDate ?? ""} disabled={disabled} onChange={(event) => field("dueDate", event.target.value || null)} />
