@@ -5,6 +5,7 @@ import {
   createReviewDraft,
   getReviewDraft,
   initializeReviewDraft,
+  publishReviewDraft,
   saveReviewDraft,
 } from "./repository";
 import type {
@@ -120,6 +121,13 @@ export async function saveCurrentReview(
   const saved = await getReviewDraft(ownerId, meeting.id);
   if (!saved) throw new Error("Unable to reload the saved review draft.");
   return saved;
+}
+
+export async function publishCurrentReview(
+  ownerId: string,
+  meetingId: string,
+) {
+  return publishReviewDraft(ownerId, meetingId);
 }
 
 function extractionOutcomes(

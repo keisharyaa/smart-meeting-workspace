@@ -647,6 +647,12 @@ export type Database = {
         }
         Returns: string
       }
+      publish_meeting_review_draft: {
+        Args: {
+          target_meeting_id: string
+        }
+        Returns: string
+      }
       save_meeting_review_draft: {
         Args: {
           draft_actions: Json

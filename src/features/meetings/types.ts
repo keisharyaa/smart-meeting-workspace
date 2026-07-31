@@ -5,6 +5,10 @@ export type MeetingSource =
   Database["public"]["Tables"]["meeting_sources"]["Row"];
 export type Project =
   Database["public"]["Tables"]["projects"]["Row"];
+export type MeetingOutcome =
+  Database["public"]["Tables"]["meeting_outcomes"]["Row"];
+export type OfficialActionItem =
+  Database["public"]["Tables"]["action_items"]["Row"];
 
 export interface MeetingMetadataInput {
   projectId: string;
@@ -46,4 +50,18 @@ export interface ActiveProjectOption {
 export interface MeetingDraftWithSources {
   meeting: Meeting;
   sources: MeetingSource[];
+}
+
+export interface PublishedMeetingDetail {
+  meeting: Meeting;
+  projectName: string;
+  sources: MeetingSource[];
+  outcomes: MeetingOutcome[];
+  actionItems: OfficialActionItem[];
+}
+
+export interface PublishedMeetingListItem {
+  meeting: Meeting;
+  projectName: string;
+  officialActionItemCount: number;
 }

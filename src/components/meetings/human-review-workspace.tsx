@@ -2,6 +2,7 @@
 
 import { Loader2, Save } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { ConfirmationDialog } from "@/components/feedback/confirmation-dialog";
 import { Alert } from "@/components/ui/alert";
@@ -12,6 +13,7 @@ import { processMeetingWithAiAction } from "@/features/extraction/actions";
 import type { ExtractionOutput } from "@/features/extraction/types";
 import type { Meeting, MeetingSource } from "@/features/meetings/types";
 import {
+  approveAndPublishReviewAction,
   acceptExtractionCandidateAction,
   continueManuallyAction,
   saveReviewDraftAction,
@@ -40,6 +42,7 @@ export function HumanReviewWorkspace({
   projectName: string;
   initialDraft: ReviewDraft | null;
 }) {
+  const router = useRouter();
   const [draft, setDraft] = useState(initialDraft);
   const [summary, setSummary] = useState(initialDraft?.summary ?? "");
   const [outcomes, setOutcomes] = useState<ReviewOutcome[]>(initialDraft?.outcomes ?? []);
@@ -48,6 +51,7 @@ export function HumanReviewWorkspace({
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [processing, setProcessing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [message, setMessage] = useState<{ variant: "info" | "success" | "warning" | "destructive"; text: string } | null>(null);
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({});
@@ -180,7 +184,62 @@ export function HumanReviewWorkspace({
     setMessage({ variant: "success", text: result.message });
   }
 
-  const editorDisabled = !draft || saving;
+  async function approveAndPublish() {
+    if (!draft) return;
+
+    const errors = Object.fromEntries(
+      actions
+        .filter((item) => !item.title.trim())
+        .map((item) => [item.id, "Action item title is required."]),
+    );
+    setActionErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setMessage({ variant: "destructive", text: "Add a title to every draft action item before publishing." });
+      setExpandedActionId(Object.keys(errors)[0]);
+      return;
+    }
+
+    setPublishing(true);
+    setMessage(null);
+    const result = await approveAndPublishReviewAction(meeting.id, {
+      draftId: draft.id,
+      expectedVersion: draft.version,
+      processingMethod: draft.processingMethod,
+      sourceExtractionRunId: draft.sourceExtractionRunId,
+      summary,
+      outcomes: outcomes.map((outcome, index) => ({
+        outcomeType: outcome.outcomeType,
+        content: outcome.content,
+        sourceReference: outcome.sourceReference,
+        displayOrder: index,
+      })),
+      actionItems: actions.map((action, index) => ({
+        projectId: action.projectId,
+        meetingId: action.meetingId,
+        title: action.title,
+        description: action.description,
+        picName: action.picName,
+        picEmail: action.picEmail,
+        picRole: action.picRole,
+        dueDate: action.dueDate,
+        dueTime: action.dueTime,
+        priority: action.priority,
+        clarificationStatus: action.clarificationStatus,
+        sourceReference: action.sourceReference,
+        displayOrder: index,
+      })),
+    });
+    setPublishing(false);
+
+    if (!result.success || !result.meetingPath) {
+      setMessage({ variant: result.conflict ? "warning" : "destructive", text: result.message });
+      return;
+    }
+
+    router.push(result.meetingPath);
+  }
+
+  const editorDisabled = !draft || saving || publishing;
 
   return (
     <div className="space-y-6">
@@ -266,10 +325,24 @@ export function HumanReviewWorkspace({
           <div aria-live="polite">
             {dirty ? <span className="text-sm text-warning-foreground">Unsaved changes</span> : <span className="text-helper">{draft ? "Draft progress is saved." : "Select a processing method to begin."}</span>}
           </div>
-          <Button className="w-full sm:w-auto" size="lg" disabled={!draft || saving || !dirty} onClick={saveDraft}>
-            {saving ? <Loader2 className="animate-spin" /> : <Save />}
-            {saving ? "Saving draft..." : "Save Draft"}
-          </Button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button className="w-full sm:w-auto" size="lg" disabled={!draft || saving || publishing || !dirty} onClick={saveDraft}>
+              {saving ? <Loader2 className="animate-spin" /> : <Save />}
+              {saving ? "Saving draft..." : "Save Draft"}
+            </Button>
+            <ConfirmationDialog
+              title="Approve and publish this meeting?"
+              description="This will create the official meeting record and official action items from the current Human Review content."
+              confirmLabel="Approve & Publish"
+              onConfirm={approveAndPublish}
+              trigger={
+                <Button type="button" className="w-full sm:w-auto" size="lg" disabled={!draft || publishing}>
+                  {publishing ? <Loader2 className="animate-spin" /> : null}
+                  {publishing ? "Publishing..." : "Approve & Publish"}
+                </Button>
+              }
+            />
+          </div>
         </CardFooter>
       </Card>
     </div>

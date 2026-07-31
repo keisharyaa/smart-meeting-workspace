@@ -129,6 +129,20 @@ export async function saveReviewDraft(
   return data;
 }
 
+export async function publishReviewDraft(ownerId: string, meetingId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("publish_meeting_review_draft", {
+    target_meeting_id: meetingId,
+  });
+
+  if (error) {
+    throw new Error("Unable to publish the meeting review.");
+  }
+
+  void ownerId;
+  return data;
+}
+
 function mapOutcome(row: {
   id: string;
   outcome_type: string;

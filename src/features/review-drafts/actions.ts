@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import {
   createManualReview,
+  publishCurrentReview,
   replaceReviewWithExtraction,
   saveCurrentReview,
 } from "./service";
@@ -18,6 +19,7 @@ export interface ReviewActionResult {
   message: string;
   draft?: ReviewDraft;
   conflict?: boolean;
+  meetingPath?: string;
 }
 
 const saveSchema = z.object({
@@ -132,6 +134,42 @@ export async function acceptExtractionCandidateAction(input: {
     return {
       success: false,
       message: "The new extraction could not replace the saved draft.",
+    };
+  }
+}
+
+export async function approveAndPublishReviewAction(
+  meetingId: string,
+  input: SaveReviewDraftInput,
+): Promise<ReviewActionResult> {
+  try {
+    const parsed = saveSchema.parse(input);
+    const { ownerId, meeting } = await requireOwnedMeeting(meetingId);
+    await saveCurrentReview(ownerId, meeting, parsed);
+    await publishCurrentReview(ownerId, meeting.id);
+
+    return {
+      success: true,
+      message: "Meeting published successfully.",
+      meetingPath: `/meetings/${meeting.id}`,
+    };
+  } catch (error) {
+    if (error instanceof Error && error.message === "VERSION_CONFLICT") {
+      return {
+        success: false,
+        conflict: true,
+        message: "This draft changed in another session. Reload before publishing again.",
+      };
+    }
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        message: error.issues[0]?.message ?? "Review the highlighted draft fields before publishing.",
+      };
+    }
+    return {
+      success: false,
+      message: "The meeting could not be published. Your draft remains available for review.",
     };
   }
 }
