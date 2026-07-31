@@ -177,6 +177,10 @@ export async function listPublishedMeetings(
   const actionItemCountByMeetingId = new Map<string, number>();
 
   for (const actionItem of officialActionItems ?? []) {
+    if (!actionItem.meeting_id) {
+      continue;
+    }
+
     actionItemCountByMeetingId.set(
       actionItem.meeting_id,
       (actionItemCountByMeetingId.get(actionItem.meeting_id) ?? 0) + 1,
