@@ -98,3 +98,128 @@ export const extractionResultSchema = z
   .strict();
 
 export type ValidatedExtractionResult = z.infer<typeof extractionResultSchema>;
+
+export const extractionProviderJsonSchema = {
+  type: "object",
+  properties: {
+    summary: {
+      type: "string",
+    },
+    decisions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          content: {
+            type: "string",
+          },
+          sourceReference: {
+            type: ["string", "null"],
+          },
+        },
+        required: ["content", "sourceReference"],
+        additionalProperties: false,
+      },
+      maxItems: 100,
+    },
+    blockers: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          content: {
+            type: "string",
+          },
+          sourceReference: {
+            type: ["string", "null"],
+          },
+        },
+        required: ["content", "sourceReference"],
+        additionalProperties: false,
+      },
+      maxItems: 100,
+    },
+    unresolvedQuestions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          content: {
+            type: "string",
+          },
+          sourceReference: {
+            type: ["string", "null"],
+          },
+        },
+        required: ["content", "sourceReference"],
+        additionalProperties: false,
+      },
+      maxItems: 100,
+    },
+    actionItems: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          title: {
+            type: "string",
+          },
+          description: {
+            type: ["string", "null"],
+          },
+          picName: {
+            type: ["string", "null"],
+          },
+          picEmail: {
+            type: ["string", "null"],
+          },
+          dueDate: {
+            type: ["string", "null"],
+          },
+          dueTime: {
+            type: ["string", "null"],
+          },
+          priority: {
+            anyOf: [
+              {
+                type: "string",
+                enum: ["low", "medium", "high"],
+              },
+              {
+                type: "null",
+              },
+            ],
+          },
+          clarificationStatus: {
+            type: "string",
+            enum: ["clear", "needs_clarification"],
+          },
+          sourceReference: {
+            type: ["string", "null"],
+          },
+        },
+        required: [
+          "title",
+          "description",
+          "picName",
+          "picEmail",
+          "dueDate",
+          "dueTime",
+          "priority",
+          "clarificationStatus",
+          "sourceReference",
+        ],
+        additionalProperties: false,
+      },
+      maxItems: 200,
+    },
+  },
+  required: [
+    "summary",
+    "decisions",
+    "blockers",
+    "unresolvedQuestions",
+    "actionItems",
+  ],
+  additionalProperties: false,
+} as const;
