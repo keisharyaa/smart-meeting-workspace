@@ -7,6 +7,7 @@ type BadgeVariant =
   | "secondary"
   | "success"
   | "warning"
+  | "info"
   | "destructive"
   | "outline";
 
@@ -21,6 +22,8 @@ const variants: Record<BadgeVariant, string> = {
     "bg-success-background text-success-foreground",
   warning:
     "bg-warning-background text-warning-foreground",
+  info:
+    "bg-info-background text-info-foreground",
   destructive:
     "bg-destructive-background text-destructive-foreground",
   outline:
