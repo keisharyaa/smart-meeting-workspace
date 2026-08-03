@@ -114,13 +114,15 @@ export const extractionProviderJsonSchema = {
             type: "string",
           },
           sourceReference: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
         },
         required: ["content", "sourceReference"],
         additionalProperties: false,
       },
-      maxItems: 100,
     },
     blockers: {
       type: "array",
@@ -131,13 +133,15 @@ export const extractionProviderJsonSchema = {
             type: "string",
           },
           sourceReference: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
         },
         required: ["content", "sourceReference"],
         additionalProperties: false,
       },
-      maxItems: 100,
     },
     unresolvedQuestions: {
       type: "array",
@@ -148,13 +152,15 @@ export const extractionProviderJsonSchema = {
             type: "string",
           },
           sourceReference: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
         },
         required: ["content", "sourceReference"],
         additionalProperties: false,
       },
-      maxItems: 100,
     },
     actionItems: {
       type: "array",
@@ -165,19 +171,34 @@ export const extractionProviderJsonSchema = {
             type: "string",
           },
           description: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
           picName: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
           picEmail: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
           dueDate: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
           dueTime: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
           priority: {
             anyOf: [
@@ -195,7 +216,10 @@ export const extractionProviderJsonSchema = {
             enum: ["clear", "needs_clarification"],
           },
           sourceReference: {
-            type: ["string", "null"],
+            anyOf: [
+              { type: "string" },
+              { type: "null" },
+            ],
           },
         },
         required: [
@@ -211,7 +235,6 @@ export const extractionProviderJsonSchema = {
         ],
         additionalProperties: false,
       },
-      maxItems: 200,
     },
   },
   required: [
