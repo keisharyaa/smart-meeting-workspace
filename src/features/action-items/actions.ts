@@ -98,6 +98,7 @@ function parseActionItemForm(
   const picName = String(formData.get("picName") ?? "").trim();
   const dueDate = String(formData.get("dueDate") ?? "").trim();
   const dueTime = String(formData.get("dueTime") ?? "").trim();
+  const safeDueTime = dueDate ? dueTime : "";
   const priority = parsePriority(String(formData.get("priority") ?? ""));
   const status = parseStatus(String(formData.get("status") ?? "todo"));
 
@@ -109,17 +110,13 @@ function parseActionItemForm(
     throw new Error("Action item title is required.");
   }
 
-  if (dueTime && !dueDate) {
-    throw new Error("A deadline time requires a deadline date.");
-  }
-
   return {
     projectId,
     title,
     description,
     picName,
     dueDate,
-    dueTime,
+    dueTime: safeDueTime,
     priority,
     status,
   };

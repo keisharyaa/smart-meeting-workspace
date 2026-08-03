@@ -23,6 +23,7 @@ import {
   updateActionItemAction,
   updateActionItemStatusAction,
 } from "@/features/action-items/actions";
+import { DeadlineFields } from "@/features/action-items/components/deadline-fields";
 import { DeleteActionItemButton } from "@/features/action-items/components/delete-action-item-button";
 import { getCurrentUserActionItemsPageData } from "@/features/action-items/queries";
 import type {
@@ -235,13 +236,7 @@ function ActionItemCreateCard({
               <Input id="create-pic" name="picName" placeholder="Unknown" />
             </Field>
 
-            <Field label="Deadline date" htmlFor="create-due-date">
-              <Input id="create-due-date" name="dueDate" type="date" />
-            </Field>
-
-            <Field label="Deadline time" htmlFor="create-due-time">
-              <Input id="create-due-time" name="dueTime" type="time" />
-            </Field>
+            <DeadlineFields dateId="create-due-date" timeId="create-due-time" />
 
             <Field label="Priority" htmlFor="create-priority">
               <PrioritySelect id="create-priority" />
@@ -429,25 +424,12 @@ function ActionItemCard({
               />
             </Field>
 
-            <div className="grid gap-3">
-              <Field label="Deadline date" htmlFor={`${actionItem.id}-due-date`}>
-                <Input
-                  id={`${actionItem.id}-due-date`}
-                  name="dueDate"
-                  type="date"
-                  defaultValue={actionItem.due_date ?? ""}
-                  className="min-w-0"
-                />
-              </Field>
-              <Field label="Deadline time" htmlFor={`${actionItem.id}-due-time`}>
-                <Input
-                  id={`${actionItem.id}-due-time`}
-                  name="dueTime"
-                  type="time"
-                  defaultValue={actionItem.due_time ?? ""}
-                />
-              </Field>
-            </div>
+            <DeadlineFields
+              dateId={`${actionItem.id}-due-date`}
+              timeId={`${actionItem.id}-due-time`}
+              defaultDate={actionItem.due_date}
+              defaultTime={actionItem.due_time}
+            />
 
             <div className="grid gap-3">
               <Field label="Priority" htmlFor={`${actionItem.id}-priority`}>
@@ -637,9 +619,9 @@ function getUrgency(actionItem: ActionItem): {
     return {
       label: "Overdue",
       variant: "outline",
-      borderClassName: "border-l-chart-5",
-      badgeClassName: "border-chart-5 bg-card text-foreground",
-      textClassName: "font-medium text-foreground",
+      borderClassName: "border-l-[#5f2f16]",
+      badgeClassName: "border-[#5f2f16] bg-[#5f2f16]/10 text-[#5f2f16]",
+      textClassName: "font-medium text-[#5f2f16]",
     };
   }
 
