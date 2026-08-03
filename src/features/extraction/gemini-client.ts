@@ -31,7 +31,6 @@ export async function generateExtraction(sourceContent: string) {
       systemInstruction: extractionSystemInstruction,
       responseMimeType: "application/json",
       responseJsonSchema: z.toJSONSchema(extractionProviderSchema),
-      temperature: 0,
     },
   });
 

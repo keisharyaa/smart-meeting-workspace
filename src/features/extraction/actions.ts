@@ -31,7 +31,7 @@ export async function processMeetingWithAiAction(meetingId: string) {
       message:
         error instanceof Error
           ? error.message
-          : "AI processing could not be completed. Your Original Meeting Notes and saved draft remain unchanged.",
+          : JSON.stringify(error)
     };
   }
 }
