@@ -20,6 +20,7 @@ export interface PeopleMeeting {
 
 export interface PeopleRecord {
   key: string;
+  personId: string | null;
   fullName: string;
   email: string | null;
   role: string | null;
@@ -30,9 +31,14 @@ export interface PeopleRecord {
   actionItems: PeopleActionItemRecord[];
 }
 
+export interface PicInformationInput {
+  fullName: string;
+  email: string | null;
+  role: string | null;
+}
+
 export interface PeopleActionItemRecord {
   actionItem: PeopleActionItem;
   projectName: string;
   meetingTitle: string | null;
 }
-

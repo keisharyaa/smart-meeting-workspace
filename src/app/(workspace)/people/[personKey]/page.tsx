@@ -14,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { EditPicInformationForm } from "@/features/people/components/edit-pic-information-form";
 import { getCurrentUserPersonDetail } from "@/features/people/queries";
 import type {
   PeopleActionItem,
@@ -124,15 +125,16 @@ export default async function PersonDetailPage({
           <CardHeader>
             <CardTitle className="heading-section">PIC Information</CardTitle>
             <CardDescription>
-              Lightweight contact data. This PIC is not an app account.
+              Edit only the lightweight PIC contact information.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <dl className="space-y-4">
-              <Info label="Full name" value={person.fullName} />
-              <Info label="Email" value={person.email ?? "Not Mentioned"} />
-              <Info label="Role" value={person.role ?? "Not Mentioned"} />
-            </dl>
+            <EditPicInformationForm
+              personKey={person.key}
+              fullName={person.fullName}
+              email={person.email ?? ""}
+              role={person.role ?? ""}
+            />
 
             <div className="mt-5 grid grid-cols-2 gap-3">
               <Metric label="Open action items" value={person.openActionItemCount} />
@@ -143,7 +145,8 @@ export default async function PersonDetailPage({
             </div>
 
             <p className="mt-5 text-helper">
-              Edit PIC information is planned for the next People stage.
+              This does not create an application account and does not change the
+              original meeting notes.
             </p>
           </CardContent>
         </Card>
@@ -381,13 +384,13 @@ function getDeadlineCondition(actionItem: PeopleActionItem) {
     };
   }
 
-  const today = startOfDay(new Date());
-  const dueDate = startOfDay(new Date(actionItem.due_date));
+  const now = new Date();
+  const dueAt = getDeadlineDateTime(actionItem);
   const dayDifference = Math.ceil(
-    (dueDate.getTime() - today.getTime()) / 86_400_000,
+    (dueAt.getTime() - now.getTime()) / 86_400_000,
   );
 
-  if (dayDifference < 0) {
+  if (dueAt.getTime() < now.getTime()) {
     return {
       label: "Overdue",
       variant: "warning" as const,
@@ -418,8 +421,10 @@ function getDeadlineCondition(actionItem: PeopleActionItem) {
   };
 }
 
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+function getDeadlineDateTime(actionItem: PeopleActionItem) {
+  return new Date(
+    `${actionItem.due_date}T${actionItem.due_time || "00:00:00"}`,
+  );
 }
 
 function formatDeadline(actionItem: PeopleActionItem) {

@@ -613,9 +613,10 @@ function getUrgency(actionItem: ActionItem): {
     };
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const dueAt = getDeadlineDateTime(actionItem);
 
-  if (actionItem.due_date < today) {
+  if (dueAt.getTime() < now.getTime()) {
     return {
       label: "Overdue",
       variant: "outline",
@@ -625,7 +626,9 @@ function getUrgency(actionItem: ActionItem): {
     };
   }
 
-  const daysUntilDue = getDaysBetween(today, actionItem.due_date);
+  const daysUntilDue = Math.ceil(
+    (dueAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   if (daysUntilDue <= 2) {
     return {
@@ -656,12 +659,10 @@ function getUrgency(actionItem: ActionItem): {
   };
 }
 
-function getDaysBetween(startDate: string, endDate: string) {
-  const start = new Date(`${startDate}T00:00:00`);
-  const end = new Date(`${endDate}T00:00:00`);
-  const millisecondsPerDay = 1000 * 60 * 60 * 24;
-
-  return Math.ceil((end.getTime() - start.getTime()) / millisecondsPerDay);
+function getDeadlineDateTime(actionItem: ActionItem) {
+  return new Date(
+    `${actionItem.due_date}T${actionItem.due_time || "00:00:00"}`,
+  );
 }
 
 function formatDeadline(actionItem: ActionItem) {

@@ -5,6 +5,7 @@ import type {
   PeopleActionItemRecord,
   PeopleMeeting,
   PeopleProject,
+  PicInformationInput,
   PeopleRecord,
 } from "./types";
 
@@ -66,6 +67,78 @@ export async function getPersonFromOfficialActionItems(
   const people = await listPeopleFromOfficialActionItems(ownerId);
 
   return people.find((person) => person.key === personKey) ?? null;
+}
+
+export async function updatePicInformation(
+  ownerId: string,
+  personKey: string,
+  input: PicInformationInput,
+): Promise<string> {
+  const supabase = await createClient();
+  const currentPerson = await getPersonFromOfficialActionItems(ownerId, personKey);
+
+  if (!currentPerson) {
+    throw new Error("PIC is not available.");
+  }
+
+  if (currentPerson.personId) {
+    const { data, error } = await supabase
+      .from("people")
+      .update({
+        name: input.fullName,
+        email: input.email,
+        role: input.role,
+      })
+      .eq("id", currentPerson.personId)
+      .eq("owner_id", ownerId)
+      .select("id")
+      .maybeSingle();
+
+    if (error || !data) {
+      throw new Error("Unable to update PIC information.");
+    }
+
+    const relatedActionItemIds = currentPerson.actionItems.map(
+      ({ actionItem }) => actionItem.id,
+    );
+    const { error: actionItemsError } = await supabase
+      .from("action_items")
+      .update({
+        person_id: currentPerson.personId,
+        pic_name: input.fullName,
+      })
+      .eq("owner_id", ownerId)
+      .eq("is_official", true)
+      .in("id", relatedActionItemIds);
+
+    if (actionItemsError) {
+      throw new Error("Unable to update related action items.");
+    }
+
+    return `pic-${slugify(input.fullName)}`;
+  }
+
+  const reusedPerson = await findReusablePerson(ownerId, input);
+  const personId = reusedPerson?.id ?? (await createPerson(ownerId, input));
+  const relatedActionItemIds = currentPerson.actionItems.map(
+    ({ actionItem }) => actionItem.id,
+  );
+
+  const { error: actionItemsError } = await supabase
+    .from("action_items")
+    .update({
+      person_id: personId,
+      pic_name: input.fullName,
+    })
+    .eq("owner_id", ownerId)
+    .eq("is_official", true)
+    .in("id", relatedActionItemIds);
+
+  if (actionItemsError) {
+    throw new Error("Unable to connect official action items to this PIC.");
+  }
+
+  return `pic-${slugify(input.fullName)}`;
 }
 
 function hasPicIdentity(actionItem: PeopleActionItem) {
@@ -172,7 +245,7 @@ function buildPeopleRecords({
       ? peopleById.get(actionItem.person_id)
       : null;
     const fullName = person?.name ?? actionItem.pic_name?.trim() ?? "Unknown PIC";
-    const key = person ? `person-${person.id}` : `pic-${slugify(fullName)}`;
+    const key = `pic-${slugify(fullName)}`;
     const existing = peopleByKey.get(key);
     const projectName =
       projectNameById.get(actionItem.project_id) ?? "Unknown project";
@@ -186,12 +259,16 @@ function buildPeopleRecords({
     };
 
     if (existing) {
+      existing.personId = existing.personId ?? person?.id ?? null;
+      existing.email = existing.email ?? person?.email ?? null;
+      existing.role = existing.role ?? person?.role ?? null;
       existing.actionItems.push(actionRecord);
       continue;
     }
 
     peopleByKey.set(key, {
       key,
+      personId: person?.id ?? null,
       fullName,
       email: person?.email ?? null,
       role: person?.role ?? null,
@@ -220,6 +297,68 @@ function buildPeopleRecords({
   return [...peopleByKey.values()].sort((a, b) =>
     a.fullName.localeCompare(b.fullName),
   );
+}
+
+async function findReusablePerson(
+  ownerId: string,
+  input: PicInformationInput,
+): Promise<PersonRow | null> {
+  const supabase = await createClient();
+
+  if (input.email) {
+    const { data, error } = await supabase
+      .from("people")
+      .select("id, name, email, role")
+      .eq("owner_id", ownerId)
+      .ilike("email", input.email)
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error("Unable to check existing PIC information.");
+    }
+
+    if (data) {
+      return data;
+    }
+  }
+
+  const { data, error } = await supabase
+    .from("people")
+    .select("id, name, email, role")
+    .eq("owner_id", ownerId)
+    .ilike("name", input.fullName)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error("Unable to check existing PIC information.");
+  }
+
+  return data;
+}
+
+async function createPerson(
+  ownerId: string,
+  input: PicInformationInput,
+): Promise<string> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("people")
+    .insert({
+      owner_id: ownerId,
+      name: input.fullName,
+      email: input.email,
+      role: input.role,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    throw new Error("Unable to create PIC information.");
+  }
+
+  return data.id;
 }
 
 function isOpenStatus(status: PeopleActionItem["status"]) {
