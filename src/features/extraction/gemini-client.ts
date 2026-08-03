@@ -1,9 +1,8 @@
 import "server-only";
 
 import { GoogleGenAI } from "@google/genai";
-import { z } from "zod";
 
-import { extractionProviderSchema } from "./schema";
+import { extractionProviderJsonSchema } from "./schema";
 import { extractionSystemInstruction } from "./prompt";
 
 export class GeminiConfigurationError extends Error {
@@ -30,7 +29,7 @@ export async function generateExtraction(sourceContent: string) {
     config: {
       systemInstruction: extractionSystemInstruction,
       responseMimeType: "application/json",
-      responseJsonSchema: z.toJSONSchema(extractionProviderSchema),
+      responseJsonSchema: extractionProviderJsonSchema,
     },
   });
 
