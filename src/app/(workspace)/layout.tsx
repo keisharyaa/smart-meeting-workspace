@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { AppHeader } from "@/components/layout/app-header";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { listDeadlineReminders } from "@/features/reminders/repository";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -40,13 +41,24 @@ export default async function WorkspaceLayout({
 
   const fullName =
     profile?.full_name?.trim() || user.user_metadata.full_name || null;
+  let unreadReminderCount = 0;
+
+  try {
+    const { summary } = await listDeadlineReminders(user.id);
+    unreadReminderCount = summary.unread;
+  } catch (error) {
+    console.error("Unable to load reminder count:", error);
+  }
 
   return (
     <div className="workspace-grid">
       <AppSidebar />
 
       <div className="min-w-0">
-        <AppHeader fullName={fullName} />
+        <AppHeader
+          fullName={fullName}
+          unreadReminderCount={unreadReminderCount}
+        />
         <main>{children}</main>
       </div>
     </div>
