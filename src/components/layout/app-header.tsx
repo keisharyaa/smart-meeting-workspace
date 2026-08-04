@@ -13,9 +13,10 @@ import { MobileNavigation } from "./mobile-navigation";
  */
 interface AppHeaderProps {
   fullName?: string;
+  unreadReminderCount?: number;
 }
 
-export function AppHeader({ fullName }: AppHeaderProps) {
+export function AppHeader({ fullName, unreadReminderCount = 0 }: AppHeaderProps) {
   const trimmedName = fullName?.trim();
   const displayName = trimmedName || "Workspace Owner";
   const initials = displayName
@@ -44,7 +45,7 @@ export function AppHeader({ fullName }: AppHeaderProps) {
         <Link
           href="/reminders"
           aria-label="Open reminders"
-          className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="relative inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <svg
             viewBox="0 0 24 24"
@@ -59,6 +60,11 @@ export function AppHeader({ fullName }: AppHeaderProps) {
             <path d="M18 8a6 6 0 1 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
             <path d="M10 21h4" />
           </svg>
+          {unreadReminderCount > 0 ? (
+            <span className="absolute -right-1 -top-1 flex min-w-5 items-center justify-center rounded-full bg-destructive px-1 text-[0.625rem] font-semibold leading-5 text-destructive-foreground">
+              {unreadReminderCount > 9 ? "9+" : unreadReminderCount}
+            </span>
+          ) : null}
         </Link>
 
         <Link
