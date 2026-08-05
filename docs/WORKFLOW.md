@@ -74,3 +74,8 @@ Do not trust AI-generated RLS, auth, destructive migrations, publication transac
 ## Definition of Done
 
 Acceptance criteria are met, error and empty states are handled, shared contracts remain consistent, migrations and docs are updated, lint passes, production build passes, manual testing is documented, and PR is reviewed and merged.
+
+When a change affects workspace navigation, a user-facing workflow, product
+terminology, statuses, deadline conditions, missing-value labels, or publication
+behavior, review the authenticated User Guide and update it or record that it is
+not affected.

@@ -52,3 +52,14 @@ The following require agreement from both developers:
 - RLS policies
 - Approve and Publish transaction
 - Dashboard aggregation rules
+
+## User Guide
+
+The User Guide is a shared, user-facing product reference. Its content is
+versioned with the application and must reflect implemented behavior rather
+than planned or unsupported features.
+
+Changes to workspace navigation, user-facing workflows, terminology, statuses,
+deadline conditions, missing-value labels, or publication behavior require a
+User Guide review by the owner of the affected module. Changes that cross module
+boundaries require agreement from both developers.

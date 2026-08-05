@@ -50,6 +50,12 @@ const iconPaths: Record<
       <path d="M16 5.5a3 3 0 0 1 0 5.8M18 14a5 5 0 0 1 2.5 4.3" />
     </>
   ),
+  guide: (
+    <>
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11a3 3 0 0 1 3 3v15a3 3 0 0 0-3-3H4Z" />
+      <path d="M20 5.5A2.5 2.5 0 0 0 17.5 3H14v18a3 3 0 0 1 3-3h3Z" />
+    </>
+  ),
   settings: (
     <>
       <circle cx="12" cy="12" r="3" />
