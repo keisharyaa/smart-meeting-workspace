@@ -5,6 +5,7 @@ export type NavigationIcon =
   | "actions"
   | "reminders"
   | "people"
+  | "guide"
   | "settings";
 
 export interface NavigationItem {
@@ -50,6 +51,12 @@ export const workspaceNavigation: NavigationItem[] = [
     href: "/people",
     icon: "people",
     description: "Manage reusable PICs",
+  },
+  {
+    label: "User Guide",
+    href: "/user-guide",
+    icon: "guide",
+    description: "Learn workspace workflows",
   },
   {
     label: "Settings",
