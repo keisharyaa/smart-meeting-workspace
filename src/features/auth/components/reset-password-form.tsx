@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,20 +8,20 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { authConfig } from "@/config/auth";
 import { createClient } from "@/lib/supabase/client";
 
-type RecoveryStatus = "checking" | "ready" | "invalid";
+type RecoveryStatus = "checking" | "ready" | "invalid" | "complete";
 
 export function ResetPasswordForm() {
-  const router = useRouter();
   const [status, setStatus] = useState<RecoveryStatus>("checking");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<
+    string | null
+  >(null);
   const [isPending, setIsPending] = useState(false);
 
   useEffect(() => {
-    const recoveryType = new URLSearchParams(window.location.hash.slice(1)).get(
-      "type",
-    );
     const supabase = createClient();
 
     const { data: listener } = supabase.auth.onAuthStateChange(
@@ -35,6 +34,46 @@ export function ResetPasswordForm() {
     );
 
     async function checkRecoverySession() {
+      const searchParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.slice(1));
+      const errorCode =
+        searchParams.get("error_code") || hashParams.get("error_code");
+      const recoveryType = hashParams.get("type");
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const code = searchParams.get("code");
+
+      if (errorCode) {
+        sessionStorage.removeItem("smw-password-recovery");
+        setStatus("invalid");
+        return;
+      }
+
+      if (accessToken && refreshToken && recoveryType === "recovery") {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+
+        if (!error) {
+          sessionStorage.setItem("smw-password-recovery", "active");
+          window.history.replaceState(null, "", "/reset-password");
+          setStatus("ready");
+          return;
+        }
+      }
+
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (!error) {
+          sessionStorage.setItem("smw-password-recovery", "active");
+          window.history.replaceState(null, "", "/reset-password");
+          setStatus("ready");
+          return;
+        }
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -67,7 +106,20 @@ export function ResetPasswordForm() {
       return;
     }
 
+    if (!confirmPassword) {
+      setConfirmPasswordError("Confirm your new password.");
+      setMessage("Please correct the highlighted fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setConfirmPasswordError("New passwords do not match.");
+      setMessage("Please correct the highlighted fields.");
+      return;
+    }
+
     setPasswordError(null);
+    setConfirmPasswordError(null);
     setMessage(null);
     setIsPending(true);
 
@@ -86,8 +138,8 @@ export function ResetPasswordForm() {
 
     sessionStorage.removeItem("smw-password-recovery");
     await supabase.auth.signOut();
-    router.replace("/login?message=password_updated");
-    router.refresh();
+    setIsPending(false);
+    setStatus("complete");
   }
 
   if (status === "checking") {
@@ -108,6 +160,26 @@ export function ResetPasswordForm() {
           className="inline-flex text-sm font-medium text-primary hover:underline"
         >
           Request a new reset link
+        </Link>
+      </div>
+    );
+  }
+
+  if (status === "complete") {
+    return (
+      <div className="space-y-5">
+        <p
+          role="status"
+          className="rounded-md border border-success/20 bg-success-background px-4 py-3 text-sm leading-6 text-success-foreground"
+        >
+          Your new password has been created successfully. You can now sign in
+          to Smart Meeting Workspace with your updated password.
+        </p>
+        <Link
+          href="/login?message=password_updated"
+          className="inline-flex text-sm font-medium text-primary hover:underline"
+        >
+          Back to Login
         </Link>
       </div>
     );
@@ -145,6 +217,38 @@ export function ResetPasswordForm() {
         ) : null}
       </div>
 
+      <div className="space-y-2">
+        <label
+          htmlFor="confirmNewPassword"
+          className="text-sm font-medium text-foreground"
+        >
+          Confirm new password <span className="text-destructive">*</span>
+        </label>
+        <PasswordInput
+          id="confirmNewPassword"
+          name="confirmPassword"
+          autoComplete="new-password"
+          placeholder="Re-enter your new password"
+          minLength={authConfig.minimumPasswordLength}
+          value={confirmPassword}
+          onChange={(event) => setConfirmPassword(event.target.value)}
+          required
+          disabled={isPending}
+          aria-invalid={Boolean(confirmPasswordError)}
+          aria-describedby={
+            confirmPasswordError ? "confirm-new-password-error" : undefined
+          }
+        />
+        {confirmPasswordError ? (
+          <p
+            id="confirm-new-password-error"
+            className="text-helper text-destructive"
+          >
+            {confirmPasswordError}
+          </p>
+        ) : null}
+      </div>
+
       {message ? (
         <p
           role="alert"
@@ -155,7 +259,7 @@ export function ResetPasswordForm() {
       ) : null}
 
       <Button type="submit" size="lg" className="w-full" disabled={isPending}>
-        {isPending ? "Updating password..." : "Update password"}
+        {isPending ? "Creating new password..." : "Create new password"}
       </Button>
     </form>
   );
