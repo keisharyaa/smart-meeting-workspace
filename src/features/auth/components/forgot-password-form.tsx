@@ -9,6 +9,16 @@ import { createClient } from "@/lib/supabase/client";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function getPasswordResetRedirectUrl() {
+  const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.trim();
+  const appOrigin =
+    configuredAppUrl && configuredAppUrl.length > 0
+      ? configuredAppUrl.replace(/\/+$/, "")
+      : window.location.origin;
+
+  return `${appOrigin}/reset-password`;
+}
+
 interface ForgotPasswordFormProps {
   initialEmail?: string;
   showLoginLink?: boolean;
@@ -46,7 +56,7 @@ export function ForgotPasswordForm({
     const { error } = await supabase.auth.resetPasswordForEmail(
       normalizedEmail,
       {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: getPasswordResetRedirectUrl(),
       },
     );
 
