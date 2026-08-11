@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -82,6 +83,8 @@ export function ProjectLifecycleControls({
 }: ProjectLifecycleControlsProps) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const hasUnfinishedActionWarning =
+    message?.toLowerCase().includes("unfinished official action items") ?? false;
 
   async function changeLifecycle(action: LifecycleAction["key"]) {
     setMessage(null);
@@ -116,9 +119,23 @@ export function ProjectLifecycleControls({
       ))}
 
       {message ? (
-        <p role="alert" className="w-full text-right text-sm text-destructive-foreground">
-          {message}
-        </p>
+        <div
+          role="alert"
+          className="w-full rounded-lg border border-warning/30 bg-warning-background p-3 text-sm text-warning-foreground"
+        >
+          <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>{message}</p>
+            {hasUnfinishedActionWarning ? (
+              <Button
+                render={<Link href={`/action-items?project=${projectId}`} />}
+                size="sm"
+                variant="outline"
+              >
+                View project action items
+              </Button>
+            ) : null}
+          </div>
+        </div>
       ) : null}
     </div>
   );

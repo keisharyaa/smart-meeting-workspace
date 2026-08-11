@@ -65,7 +65,7 @@ export async function listDeadlineReminders(ownerId: string): Promise<{
   ] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, name")
+      .select("id, name, status")
       .eq("owner_id", ownerId)
       .in("id", projectIds),
     supabase
@@ -80,18 +80,21 @@ export async function listDeadlineReminders(ownerId: string): Promise<{
     throw new Error("Unable to load reminder context.");
   }
 
-  const projectNameById = new Map(
-    (projects ?? []).map((project) => [project.id, project.name]),
+  const activeProjectNameById = new Map(
+    (projects ?? [])
+      .filter((project) => project.status !== "archived")
+      .map((project) => [project.id, project.name]),
   );
   const readStateByActionItemId = buildReadStateByActionItemId(
     notifications ?? [],
   );
   const reminders = actionItems
+    .filter((actionItem) => activeProjectNameById.has(actionItem.project_id))
     .map((actionItem) =>
       buildReminderRecord({
         actionItem,
         projectName:
-          projectNameById.get(actionItem.project_id) ?? "Unknown project",
+          activeProjectNameById.get(actionItem.project_id) ?? "Unknown project",
         isRead: readStateByActionItemId.get(actionItem.id) ?? false,
         timezone,
       }),
@@ -127,6 +130,22 @@ export async function markReminderRead(
   }
 
   if (!actionItem) {
+    return null;
+  }
+
+  const { data: project, error: projectError } = await supabase
+    .from("projects")
+    .select("id")
+    .eq("id", actionItem.project_id)
+    .eq("owner_id", ownerId)
+    .neq("status", "archived")
+    .maybeSingle();
+
+  if (projectError) {
+    throw new Error("Unable to verify this reminder project.");
+  }
+
+  if (!project) {
     return null;
   }
 

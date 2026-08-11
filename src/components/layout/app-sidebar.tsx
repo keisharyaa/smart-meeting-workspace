@@ -80,16 +80,6 @@ export function AppSidebar() {
         </ul>
       </nav>
 
-      <div className="border-t border-border p-4">
-        <div className="rounded-lg bg-muted px-3.5 py-3">
-          <p className="text-xs font-semibold text-foreground">
-            Human-reviewed workflow
-          </p>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            AI output remains a draft until you approve and publish it.
-          </p>
-        </div>
-      </div>
     </aside>
   );
 }

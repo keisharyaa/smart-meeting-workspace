@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 import {
@@ -12,6 +13,7 @@ import type {
   FinalizeMeetingInput,
   MeetingMetadataInput,
 } from "./types";
+import { deleteMeetingDraft } from "./repository";
 
 export interface MeetingIntakeActionState {
   success: boolean;
@@ -98,6 +100,26 @@ export async function cancelMeetingDraftAction(input: {
     await cancelMeetingDraft(userId, input.meetingId, input.storagePaths);
   } catch (error) {
     console.error("Unable to cancel meeting draft:", error);
+  }
+}
+
+export async function deleteMeetingDraftFromListAction(
+  meetingId: string,
+): Promise<{ success: boolean; message: string | null }> {
+  try {
+    const userId = await requireUserId();
+    await deleteMeetingDraft(userId, meetingId);
+
+    revalidatePath("/meetings");
+
+    return { success: true, message: null };
+  } catch (error) {
+    console.error("Unable to delete meeting draft:", error);
+
+    return {
+      success: false,
+      message: "We could not delete this draft. Please try again.",
+    };
   }
 }
 

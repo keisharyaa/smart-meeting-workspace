@@ -76,7 +76,7 @@ export async function listOfficialActionItems(
   ] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, name")
+      .select("id, name, status")
       .eq("owner_id", ownerId)
       .in("id", projectIds),
     meetingIds.length > 0
@@ -92,20 +92,25 @@ export async function listOfficialActionItems(
     throw new Error("Unable to load action item context.");
   }
 
-  const projectNameById = new Map(
-    (projects ?? []).map((project) => [project.id, project.name]),
+  const activeProjectNameById = new Map(
+    (projects ?? [])
+      .filter((project) => project.status !== "archived")
+      .map((project) => [project.id, project.name]),
   );
   const meetingTitleById = new Map(
     (meetings ?? []).map((meeting) => [meeting.id, meeting.title]),
   );
 
-  return actionItems.map((actionItem) => ({
-    actionItem,
-    projectName: projectNameById.get(actionItem.project_id) ?? "Unknown project",
-    meetingTitle: actionItem.meeting_id
-      ? meetingTitleById.get(actionItem.meeting_id) ?? "Unknown meeting"
-      : null,
-  }));
+  return actionItems
+    .filter((actionItem) => activeProjectNameById.has(actionItem.project_id))
+    .map((actionItem) => ({
+      actionItem,
+      projectName:
+        activeProjectNameById.get(actionItem.project_id) ?? "Unknown project",
+      meetingTitle: actionItem.meeting_id
+        ? meetingTitleById.get(actionItem.meeting_id) ?? "Unknown meeting"
+        : null,
+    }));
 }
 
 export async function listActionItemProjects(
@@ -116,6 +121,7 @@ export async function listActionItemProjects(
     .from("projects")
     .select("id, name, status")
     .eq("owner_id", ownerId)
+    .neq("status", "archived")
     .order("updated_at", { ascending: false });
 
   if (error) {
