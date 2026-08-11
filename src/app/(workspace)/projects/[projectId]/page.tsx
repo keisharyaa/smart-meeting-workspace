@@ -81,6 +81,7 @@ export default async function ProjectDetailPage({
         eyebrow="Projects"
         title={project.name}
         description="Project information and workspace record."
+        className="mb-3"
         actions={
           <>
             <Link
@@ -96,10 +97,26 @@ export default async function ProjectDetailPage({
             >
               Edit project
             </Link>
-            <ProjectLifecycleControls projectId={project.id} status={project.status} />
           </>
         }
       />
+
+      <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              Project lifecycle
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Complete, reopen, archive, or restore this project based on its
+              official action-item status.
+            </p>
+          </div>
+          <div className="w-full lg:max-w-xl">
+            <ProjectLifecycleControls projectId={project.id} status={project.status} />
+          </div>
+        </div>
+      </div>
 
       <Card>
         <CardContent className="pt-5">

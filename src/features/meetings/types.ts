@@ -55,6 +55,7 @@ export interface MeetingDraftWithSources {
 export interface PublishedMeetingDetail {
   meeting: Meeting;
   projectName: string;
+  projectStatus: Project["status"];
   sources: MeetingSource[];
   outcomes: MeetingOutcome[];
   actionItems: OfficialActionItem[];
@@ -63,5 +64,6 @@ export interface PublishedMeetingDetail {
 export interface PublishedMeetingListItem {
   meeting: Meeting;
   projectName: string;
+  projectStatus: Project["status"];
   officialActionItemCount: number;
 }

@@ -133,51 +133,53 @@ export default async function ActionItemsPage({
               icon={<ClipboardList className="size-5" />}
             />
           ) : (
-            <section
-              className="grid gap-4 xl:grid-cols-4"
-              aria-label="Action item board"
-            >
-              {statusColumns.map((column) => {
-                const columnItems = actionItems.filter(
-                  (item) => item.actionItem.status === column.status,
-                );
+            <div className="overflow-x-auto pb-3">
+              <section
+                className="grid min-w-[1120px] gap-4 xl:min-w-0 xl:grid-cols-4"
+                aria-label="Action item board"
+              >
+                {statusColumns.map((column) => {
+                  const columnItems = actionItems.filter(
+                    (item) => item.actionItem.status === column.status,
+                  );
 
-                return (
-                  <div
-                    key={column.status}
-                    className={`space-y-3 rounded-lg border border-border border-t-4 bg-background/70 p-3 ${column.accentClassName}`}
-                  >
-                    <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
-                      <div>
-                        <h2 className="heading-section text-foreground">
-                          {column.title}
-                        </h2>
-                        <p className="text-caption text-muted-foreground">
-                          {column.description}
-                        </p>
+                  return (
+                    <div
+                      key={column.status}
+                      className={`space-y-3 rounded-lg border border-border border-t-4 bg-background/70 p-3 ${column.accentClassName}`}
+                    >
+                      <div className="flex items-center justify-between gap-3 border-b border-border pb-3">
+                        <div>
+                          <h2 className="heading-section text-foreground">
+                            {column.title}
+                          </h2>
+                          <p className="text-caption text-muted-foreground">
+                            {column.description}
+                          </p>
+                        </div>
+                        <Badge variant={column.badgeVariant}>
+                          {columnItems.length}
+                        </Badge>
                       </div>
-                      <Badge variant={column.badgeVariant}>
-                        {columnItems.length}
-                      </Badge>
+
+                      {columnItems.length === 0 ? (
+                        <div className="rounded-md border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
+                          No items.
+                        </div>
+                      ) : (
+                        columnItems.map((record) => (
+                          <ActionItemCard
+                            key={record.actionItem.id}
+                            record={record}
+                            returnTo={currentPath}
+                          />
+                        ))
+                      )}
                     </div>
-
-                    {columnItems.length === 0 ? (
-                      <div className="rounded-md border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
-                        No items.
-                      </div>
-                    ) : (
-                      columnItems.map((record) => (
-                        <ActionItemCard
-                          key={record.actionItem.id}
-                          record={record}
-                          returnTo={currentPath}
-                        />
-                      ))
-                    )}
-                  </div>
-                );
-              })}
-            </section>
+                  );
+                })}
+              </section>
+            </div>
           )}
         </div>
       )}
@@ -343,16 +345,21 @@ function ActionItemCard({
   const urgency = getUrgency(actionItem);
 
   return (
-    <Card className={`border-l-4 ${urgency.borderClassName}`}>
-      <CardHeader>
-        <div className="flex items-start justify-between gap-3">
+    <Card className={`overflow-hidden border-l-4 ${urgency.borderClassName}`}>
+      <CardHeader className="space-y-3">
+        <div className="flex flex-col gap-3">
           <div className="min-w-0">
-            <CardTitle className="heading-card">{actionItem.title}</CardTitle>
+            <CardTitle className="heading-card break-words leading-snug">
+              {actionItem.title}
+            </CardTitle>
             <CardDescription className="mt-1 line-clamp-3">
               {actionItem.description ?? "No description."}
             </CardDescription>
           </div>
-          <Badge variant={urgency.variant} className={urgency.badgeClassName}>
+          <Badge
+            variant={urgency.variant}
+            className={`w-fit ${urgency.badgeClassName}`}
+          >
             {urgency.label}
           </Badge>
         </div>
@@ -373,7 +380,7 @@ function ActionItemCard({
           />
         </dl>
 
-        <form action={updateActionItemStatusAction} className="flex gap-2">
+        <form action={updateActionItemStatusAction} className="grid gap-2 sm:grid-cols-[1fr_auto]">
           <input type="hidden" name="actionItemId" value={actionItem.id} />
           <input type="hidden" name="returnTo" value={returnTo} />
           <Select name="status" defaultValue={actionItem.status} aria-label="Update action status">
@@ -383,7 +390,7 @@ function ActionItemCard({
               </option>
             ))}
           </Select>
-          <Button type="submit" variant="outline" aria-label="Save status">
+          <Button type="submit" variant="outline" aria-label="Save status" className="w-full sm:w-auto">
             <Save />
             Update
           </Button>
@@ -462,7 +469,10 @@ function ActionItemCard({
         {actionItem.meeting_id ? (
           <Link
             href={`/meetings/${actionItem.meeting_id}`}
-            className={buttonVariants({ variant: "ghost", className: "w-full" })}
+            className={buttonVariants({
+              variant: "ghost",
+              className: "w-full whitespace-normal text-center",
+            })}
           >
             <CalendarClock />
             Open source meeting
@@ -537,9 +547,9 @@ function Info({
   valueClassName?: string;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className={`text-right text-foreground ${valueClassName ?? ""}`}>
+    <div className="rounded-md bg-muted/30 px-3 py-2">
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+      <dd className={`mt-1 break-words text-sm text-foreground ${valueClassName ?? ""}`}>
         {value}
       </dd>
     </div>

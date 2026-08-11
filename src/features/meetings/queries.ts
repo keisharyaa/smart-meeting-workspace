@@ -75,7 +75,7 @@ export async function getCurrentUserPublishedMeetings(): Promise<PublishedMeetin
       error: null,
     };
   } catch (error) {
-    console.error("Unable to load published meetings:", error);
+    console.error("Unable to load meetings:", error);
 
     return {
       meetings: [],
@@ -128,7 +128,7 @@ export async function getCurrentUserPublishedMeeting(
     ] = await Promise.all([
       supabase
         .from("projects")
-        .select("name")
+        .select("name, status")
         .eq("id", meeting.project_id)
         .eq("owner_id", user.id)
         .single(),
@@ -162,6 +162,7 @@ export async function getCurrentUserPublishedMeeting(
       meetingDetail: {
         meeting,
         projectName: project.name,
+        projectStatus: project.status,
         sources: sources ?? [],
         outcomes: outcomes ?? [],
         actionItems: actionItems ?? [],

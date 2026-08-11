@@ -173,21 +173,29 @@ export async function getDashboardData(): Promise<DashboardData> {
   const meetings = meetingsResult.data ?? [];
   const actionItems = actionItemsResult.data ?? [];
   const timezone = remindersResult.timezone || profile?.timezone || "Asia/Jakarta";
+  const visibleProjects = projects.filter(({ status }) => status !== "archived");
+  const visibleProjectIds = new Set(visibleProjects.map((project) => project.id));
+  const activeOfficialActionItems = actionItems.filter((actionItem) =>
+    visibleProjectIds.has(actionItem.project_id),
+  );
   const projectNameById = new Map(
-    projects.map((project) => [project.id, project.name]),
+    visibleProjects.map((project) => [project.id, project.name]),
   );
 
-  const openActionItems = actionItems.filter(({ status }) =>
+  const openActionItems = activeOfficialActionItems.filter(({ status }) =>
     isOpenStatus(status),
   );
-  const completedActionItems = actionItems.filter(
+  const completedActionItems = activeOfficialActionItems.filter(
     ({ status }) => status === "done",
   );
-  const publishedMeetings = meetings.filter(({ is_published }) => is_published);
+  const publishedMeetings = meetings.filter(
+    ({ is_published, project_id }) =>
+      is_published && visibleProjectIds.has(project_id),
+  );
 
   const summary: DashboardSummary = {
-    activeProjects: projects.filter(({ status }) => status === "active").length,
-    doneProjects: projects.filter(({ status }) => status === "done").length,
+    activeProjects: visibleProjects.filter(({ status }) => status === "active").length,
+    doneProjects: visibleProjects.filter(({ status }) => status === "done").length,
     publishedMeetings: publishedMeetings.length,
     processingMeetings: publishedMeetings.filter(
       ({ status }) => status === "processing",
@@ -207,15 +215,18 @@ export async function getDashboardData(): Promise<DashboardData> {
     ownerName: profile?.full_name || "Workspace Owner",
     timezone,
     summary,
-    progress: buildProgress(actionItems),
-    deadlineDistribution: buildDeadlineDistribution(actionItems, timezone),
+    progress: buildProgress(activeOfficialActionItems),
+    deadlineDistribution: buildDeadlineDistribution(activeOfficialActionItems, timezone),
     meetingStatus: buildMeetingStatus(publishedMeetings),
     recentMeetings: buildRecentMeetings({
       meetings: publishedMeetings,
-      actionItems,
+      actionItems: activeOfficialActionItems,
       projectNameById,
     }),
-    projectActivity: buildProjectActivity({ projects, actionItems }),
+    projectActivity: buildProjectActivity({
+      projects: visibleProjects,
+      actionItems: activeOfficialActionItems,
+    }),
     peopleWorkload: people
       .map((person) => ({
         key: person.key,

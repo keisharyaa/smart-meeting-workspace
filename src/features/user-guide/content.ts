@@ -60,7 +60,7 @@ export const projectStatuses: ReferenceItem[] = [
 ];
 
 export const meetingStatuses: ReferenceItem[] = [
-  { label: "Draft", meaning: "The meeting is still in intake or Human Review and is not an official meeting record.", tone: "neutral" },
+  { label: "Draft", meaning: "The meeting has been started but has not been approved and published yet.", detail: "Draft meetings may come from saved intake or Human Review progress. They remain unofficial until Approve & Publish succeeds.", tone: "neutral" },
   { label: "Processing", meaning: "The published meeting still has unfinished official action items.", tone: "warning" },
   { label: "Completed", meaning: "The published meeting has no unfinished official action items.", tone: "success" },
 ];
@@ -74,6 +74,7 @@ export const actionStatuses: ReferenceItem[] = [
 
 export const draftTerms: ReferenceItem[] = [
   { label: "Draft", meaning: "Editable and unofficial content." },
+  { label: "Archived Project", meaning: "A label shown when a meeting is linked to a project that has been archived.", detail: "The meeting can still be viewed, but the archived project is excluded from active work views until restored." },
   { label: "AI Generated", meaning: "Draft content produced from Original Meeting Notes. Review is required.", tone: "info" },
   { label: "User Edited", meaning: "The current draft has changes that may need saving.", tone: "warning" },
   { label: "Needs Clarification", meaning: "An action contains material uncertainty that should be resolved before publication.", tone: "warning" },

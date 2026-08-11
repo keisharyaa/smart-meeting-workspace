@@ -23,6 +23,12 @@ type MeetingRow = {
   is_published: boolean;
 };
 
+type ProjectContextRow = {
+  id: string;
+  name: string;
+  status: string;
+};
+
 export async function listPeopleFromOfficialActionItems(
   ownerId: string,
 ): Promise<PeopleRecord[]> {
@@ -46,14 +52,29 @@ export async function listPeopleFromOfficialActionItems(
     return [];
   }
 
+  const projectContextById = await loadProjectsById(ownerId, officialPicActionItems);
+  const activeOfficialPicActionItems = officialPicActionItems.filter((actionItem) => {
+    return projectContextById.get(actionItem.project_id)?.status !== "archived";
+  });
+
+  if (activeOfficialPicActionItems.length === 0) {
+    return [];
+  }
+
   const [peopleById, projectNameById, meetingsById] = await Promise.all([
-    loadPeopleById(ownerId, officialPicActionItems),
-    loadProjectNamesById(ownerId, officialPicActionItems),
-    loadMeetingsById(ownerId, officialPicActionItems),
+    loadPeopleById(ownerId, activeOfficialPicActionItems),
+    Promise.resolve(
+      new Map(
+        [...projectContextById.values()]
+          .filter((project) => project.status !== "archived")
+          .map((project) => [project.id, project.name]),
+      ),
+    ),
+    loadMeetingsById(ownerId, activeOfficialPicActionItems),
   ]);
 
   return buildPeopleRecords({
-    actionItems: officialPicActionItems,
+    actionItems: activeOfficialPicActionItems,
     peopleById,
     projectNameById,
     meetingsById,
@@ -175,7 +196,7 @@ async function loadPeopleById(
   return new Map((data ?? []).map((person) => [person.id, person]));
 }
 
-async function loadProjectNamesById(
+async function loadProjectsById(
   ownerId: string,
   actionItems: PeopleActionItem[],
 ) {
@@ -186,7 +207,7 @@ async function loadProjectNamesById(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("projects")
-    .select("id, name")
+    .select("id, name, status")
     .eq("owner_id", ownerId)
     .in("id", projectIds);
 
@@ -194,7 +215,7 @@ async function loadProjectNamesById(
     throw new Error("Unable to load related projects.");
   }
 
-  return new Map((data ?? []).map((project) => [project.id, project.name]));
+  return new Map((data ?? []).map((project) => [project.id, project as ProjectContextRow]));
 }
 
 async function loadMeetingsById(

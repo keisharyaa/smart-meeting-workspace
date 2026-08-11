@@ -181,6 +181,11 @@ async function runLifecycleAction(
 
   revalidatePath("/projects");
   revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/meetings");
+  revalidatePath("/action-items");
+  revalidatePath("/dashboard");
+  revalidatePath("/reminders");
+  revalidatePath("/people");
   return { success: true, message: null };
 }
 

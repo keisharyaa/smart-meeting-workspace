@@ -135,12 +135,10 @@ export async function listPublishedMeetings(
     .from("meetings")
     .select("id, title, project_id, meeting_date, meeting_time, participants, status, approved_summary, published_at, updated_at, created_at, owner_id, is_published")
     .eq("owner_id", ownerId)
-    .eq("is_published", true)
-    .order("published_at", { ascending: false })
     .order("updated_at", { ascending: false });
 
   if (meetingsError) {
-    throw new Error("Unable to load published meetings.");
+    throw new Error("Unable to load meeting records.");
   }
 
   if (!meetings || meetings.length === 0) {
@@ -156,7 +154,7 @@ export async function listPublishedMeetings(
   ] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, name")
+      .select("id, name, status")
       .eq("owner_id", ownerId)
       .in("id", projectIds),
     supabase
@@ -174,6 +172,9 @@ export async function listPublishedMeetings(
   const projectNameById = new Map(
     (projects ?? []).map((project) => [project.id, project.name]),
   );
+  const projectStatusById = new Map(
+    (projects ?? []).map((project) => [project.id, project.status]),
+  );
   const actionItemCountByMeetingId = new Map<string, number>();
 
   for (const actionItem of officialActionItems ?? []) {
@@ -190,6 +191,7 @@ export async function listPublishedMeetings(
   return meetings.map((meeting) => ({
     meeting,
     projectName: projectNameById.get(meeting.project_id) ?? "Unknown project",
+    projectStatus: projectStatusById.get(meeting.project_id) ?? "active",
     officialActionItemCount: actionItemCountByMeetingId.get(meeting.id) ?? 0,
   }));
 }

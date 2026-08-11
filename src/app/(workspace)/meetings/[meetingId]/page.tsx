@@ -74,8 +74,10 @@ export default async function MeetingDetailPage({
     );
   }
 
-  const { meeting, projectName, sources, outcomes, actionItems } = meetingDetail;
+  const { meeting, projectName, projectStatus, sources, outcomes, actionItems } =
+    meetingDetail;
   const status = meetingStatusPresentation[meeting.status];
+  const isArchivedProject = projectStatus === "archived";
 
   return (
     <PageContainer className="max-w-5xl">
@@ -92,6 +94,9 @@ export default async function MeetingDetailPage({
               Back to Meetings
             </Link>
             <Badge variant={status.variant}>{status.label}</Badge>
+            {isArchivedProject ? (
+              <Badge variant="outline">Archived Project</Badge>
+            ) : null}
           </>
         }
       />
@@ -103,7 +108,12 @@ export default async function MeetingDetailPage({
               <dt className="text-caption font-medium text-muted-foreground">
                 Project
               </dt>
-              <dd className="mt-1.5 text-body text-foreground">{projectName}</dd>
+              <dd className="mt-1.5 flex flex-wrap items-center gap-2 text-body text-foreground">
+                <span>{projectName}</span>
+                {isArchivedProject ? (
+                  <Badge variant="outline">Archived Project</Badge>
+                ) : null}
+              </dd>
             </div>
 
             <div>

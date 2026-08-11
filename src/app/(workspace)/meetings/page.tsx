@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getCurrentUserPublishedMeetings } from "@/features/meetings/queries";
+import { DeleteMeetingDraftButton } from "@/features/meetings/components/delete-meeting-draft-button";
 import type { Meeting, PublishedMeetingListItem } from "@/features/meetings/types";
 
 export const metadata = {
@@ -57,8 +58,8 @@ export default async function MeetingsPage() {
         <ErrorState title="Meetings are unavailable" message={error} />
       ) : meetings.length === 0 ? (
         <EmptyState
-          title="No published meetings yet"
-          description="Start by adding meeting notes. Draft meetings remain in Human Review until they are approved and published."
+          title="No meetings yet"
+          description="Start by adding meeting notes. Draft meetings will appear here until they are approved and published."
           action={
             <Button render={<Link href="/meetings/new" />}>
               <Plus />
@@ -81,59 +82,104 @@ export default async function MeetingsPage() {
 }
 
 function MeetingRecordCard({ item }: { item: PublishedMeetingListItem }) {
-  const { meeting, projectName, officialActionItemCount } = item;
+  const { meeting, projectName, projectStatus, officialActionItemCount } = item;
   const status = meetingStatusPresentation[meeting.status];
+  const isArchivedProject = projectStatus === "archived";
+  const isDraft = !meeting.is_published;
+  const meetingHref = isDraft
+    ? `/meetings/${meeting.id}/review`
+    : `/meetings/${meeting.id}`;
 
   return (
-    <Link
-      href={`/meetings/${meeting.id}`}
-      className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-    >
-      <Card className="h-full transition-colors hover:bg-muted/40">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-3">
-            <CardTitle className="line-clamp-2">{meeting.title}</CardTitle>
+    <Card className="flex h-full flex-col transition-colors hover:bg-muted/40">
+      <CardHeader>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            {isArchivedProject ? (
+              <Badge
+                variant="outline"
+                className="border-muted-foreground/30 bg-muted text-muted-foreground"
+              >
+                Archived Project
+              </Badge>
+            ) : null}
             <Badge variant={status.variant}>{status.label}</Badge>
           </div>
-          <CardDescription className="line-clamp-3 min-h-[3.75rem]">
-            {meeting.approved_summary?.trim()
+          <CardTitle className="line-clamp-2">{meeting.title}</CardTitle>
+        </div>
+        <CardDescription className="line-clamp-3 min-h-[3.75rem]">
+          {isDraft
+            ? "This meeting is still a draft. Continue Human Review to finish and publish it, or delete it if it is no longer needed."
+            : meeting.approved_summary?.trim()
               ? meeting.approved_summary
               : "No approved summary was published."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <dl className="space-y-2 text-sm text-muted-foreground">
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-1 flex-col justify-between gap-4">
+        <dl className="space-y-2 text-sm text-muted-foreground">
+          <div className="flex items-center justify-between gap-3">
+            <dt>Project</dt>
+            <dd className="max-w-[65%] text-right text-foreground">
+              <span className="break-words">{projectName}</span>
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt>Date</dt>
+            <dd className="text-right text-foreground">
+              {dateFormatter.format(new Date(meeting.meeting_date))}
+            </dd>
+          </div>
+          {isDraft ? (
             <div className="flex items-center justify-between gap-3">
-              <dt>Project</dt>
-              <dd className="text-right text-foreground">{projectName}</dd>
+              <dt>Progress</dt>
+              <dd className="text-right text-foreground">Needs review</dd>
             </div>
-            <div className="flex items-center justify-between gap-3">
-              <dt>Date</dt>
-              <dd className="text-right text-foreground">
-                {dateFormatter.format(new Date(meeting.meeting_date))}
-              </dd>
-            </div>
+          ) : (
             <div className="flex items-center justify-between gap-3">
               <dt>Official action items</dt>
               <dd className="text-right text-foreground">
                 {officialActionItemCount}
               </dd>
             </div>
-          </dl>
+          )}
+        </dl>
 
-          <div className="flex items-center justify-between gap-3 text-caption text-muted-foreground">
+        <div className="space-y-3">
+          <div className="text-caption text-muted-foreground">
             <span>
-              Published{" "}
-              {meeting.published_at
-                ? dateFormatter.format(new Date(meeting.published_at))
-                : "Not published"}
-            </span>
-            <span className={buttonVariants({ variant: "ghost", className: "h-auto px-0 py-0 text-caption" })}>
-              View detail
+              {isDraft ? (
+                <>Updated {dateFormatter.format(new Date(meeting.updated_at))}</>
+              ) : (
+                <>
+                  Published{" "}
+                  {meeting.published_at
+                    ? dateFormatter.format(new Date(meeting.published_at))
+                    : "Not published"}
+                </>
+              )}
             </span>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href={meetingHref}
+              className={buttonVariants({
+                variant: isDraft ? "default" : "outline",
+                size: "sm",
+              })}
+            >
+              {isDraft ? "Continue review" : "View detail"}
+            </Link>
+
+            {isDraft ? (
+              <DeleteMeetingDraftButton
+                meetingId={meeting.id}
+                title={meeting.title}
+              />
+            ) : null}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
