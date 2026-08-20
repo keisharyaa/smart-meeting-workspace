@@ -44,8 +44,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             role="alert"
             className="mb-5 rounded-md border border-destructive/20 bg-destructive-background px-3 py-2 text-sm text-destructive-foreground"
           >
-            We could not confirm your account. Please try signing in or
-            registering again.
+            Your account may already be confirmed or this confirmation link
+may have already been processed. Please sign in using the email and
+password you registered.
           </p>
         ) : null}
         {message === "password_updated" ? (
