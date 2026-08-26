@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { trackEvent } from "@/features/analytics/events";
 import { createClient } from "@/lib/supabase/server";
 
 import { markReminderRead } from "./repository";
@@ -37,6 +38,17 @@ export async function markReminderMessageReadAction(
 
   const userId = await getCurrentUserId();
   const actionItem = await markReminderRead(userId, normalizedActionItemId);
+  if (actionItem) {
+    await trackEvent({
+      eventName: "reminder_opened",
+      page: "/reminders",
+      userId,
+      metadata: {
+        actionItemId: normalizedActionItemId,
+        status: actionItem.status,
+      },
+    });
+  }
   revalidatePath("/reminders");
 
   return Boolean(actionItem);

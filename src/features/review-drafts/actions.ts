@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 
+import { trackEvent } from "@/features/analytics/events";
 import { extractionResultSchema } from "@/features/extraction/schema";
 import { getOwnedMeetingDraft } from "@/features/meetings/repository";
 import { createClient } from "@/lib/supabase/server";
@@ -147,6 +148,18 @@ export async function approveAndPublishReviewAction(
     const { ownerId, meeting } = await requireOwnedMeeting(meetingId);
     await saveCurrentReview(ownerId, meeting, parsed);
     await publishCurrentReview(ownerId, meeting.id);
+    await trackEvent({
+      eventName: "meeting_published",
+      page: `/meetings/${meeting.id}/review`,
+      userId: ownerId,
+      metadata: {
+        meetingId: meeting.id,
+        projectId: meeting.project_id,
+        processingMethod: parsed.processingMethod,
+        outcomeCount: parsed.outcomes.length,
+        actionItemCount: parsed.actionItems.length,
+      },
+    });
 
     return {
       success: true,

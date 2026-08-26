@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { trackEvent } from "@/features/analytics/events";
 import { createClient } from "@/lib/supabase/server";
 
 import {
@@ -131,7 +132,24 @@ export async function updateProjectAction(
 export async function markProjectDoneAction(
   projectId: string,
 ): Promise<ProjectLifecycleActionState> {
-  return runLifecycleAction(projectId, markProjectDone);
+  const result = await runLifecycleAction(projectId, markProjectDone);
+
+  if (
+    isUuid(projectId) &&
+    !result.success &&
+    result.message?.includes("unfinished official action items")
+  ) {
+    await trackEvent({
+      eventName: "project_mark_done_blocked",
+      page: `/projects/${projectId}`,
+      metadata: {
+        projectId,
+        reason: "unfinished_official_action_items",
+      },
+    });
+  }
+
+  return result;
 }
 
 export async function reopenProjectAction(

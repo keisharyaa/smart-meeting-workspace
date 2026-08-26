@@ -18,6 +18,7 @@ erDiagram
     MEETINGS ||--o{ ACTION_ITEMS : produces
     PEOPLE ||--o{ ACTION_ITEMS : assigned_to
     ACTION_ITEMS ||--o{ NOTIFICATIONS : generates
+    PROFILES ||--o{ ANALYTICS_EVENTS : records
 ```
 
 ## Tables
@@ -34,6 +35,7 @@ erDiagram
 - `meeting_outcomes`: summary, decisions, blockers, unresolved questions, review method and status
 - `action_items`: project, meeting, title, description, PIC, deadline, priority, status, source reference, official flag
 - `notifications`: action item, reminder type, read state
+- `analytics_events`: safe product usage events with event name, user, page, metadata, and timestamp
 
 ## Core Constraints
 
@@ -49,6 +51,7 @@ erDiagram
 - Human Review drafts remain in dedicated tables and never affect official-module queries.
 - Full review-draft saves replace child collections atomically and reject stale versions.
 - New Auth users create their profile atomically from approved registration metadata.
+- Analytics events must not store passwords, full meeting notes, raw transcripts, tokens, or other sensitive content.
 
 ## RLS Strategy
 

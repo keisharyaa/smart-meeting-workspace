@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { trackEvent } from "@/features/analytics/events";
 import { createClient } from "@/lib/supabase/server";
 
 import {
@@ -48,6 +49,17 @@ export async function updateActionItemStatusAction(
 
   const actionItem = await updateActionStatus(userId, actionItemId, status);
   await syncMeetingStatusFromActions(userId, actionItem?.meeting_id ?? null);
+  await trackEvent({
+    eventName: "action_status_updated",
+    page: "/action-items",
+    userId,
+    metadata: {
+      actionItemId,
+      nextStatus: status,
+      meetingId: actionItem?.meeting_id ?? null,
+      projectId: actionItem?.project_id ?? null,
+    },
+  });
   revalidateActionItemPages(actionItem?.meeting_id ?? null);
   redirect(getSafeReturnTo(formData));
 }
