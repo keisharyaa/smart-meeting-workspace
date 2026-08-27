@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
+import { trackEvent } from "@/features/analytics/events";
 import {
   getDashboardData,
   type DashboardData,
@@ -66,6 +67,16 @@ export default async function DashboardPage() {
 async function loadDashboard() {
   try {
     const dashboard = await getDashboardData();
+    await trackEvent({
+      eventName: "dashboard_viewed",
+      page: "/dashboard",
+      metadata: {
+        activeProjects: dashboard.summary.activeProjects,
+        publishedMeetings: dashboard.summary.publishedMeetings,
+        openActions: dashboard.summary.openActions,
+        unreadReminders: dashboard.summary.unreadReminders,
+      },
+    });
 
     return { dashboard, hasError: false };
   } catch {
